@@ -1,4 +1,4 @@
-# Galaga
+# ComMang-Galaga
 알고리즘과 게임 컨텐츠 - 15조 컴맹 - 갤러그 게임 Repositories
 
 ---
