@@ -150,13 +150,17 @@ def runGame():
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
     x_change = 0    #갤러리안의 x좌표 변화량
     y_change = 0    #갤러리안의 y좌표 변화량
-    heart = start_heart
+    heart = start_heart #갤러리안 생명
 
     bullet_xy = []  #미사일 xy 좌표
+
+    #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3
     enemy_xy = [[], [], [], []]
     enemy_speed = [3, 3, 3, 3] #적 스피드
     enemy_persentage = [10, 10, 10 ,10]
     nextLevel = [10, 10, 10, 10]
+
+    #보스 변수는 새로 생성해야함
         
     ongame = False
     onPause = False
