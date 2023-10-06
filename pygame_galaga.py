@@ -227,8 +227,8 @@ def runGame():
                 #갤러리안이 적과 충돌했는지 체크
                 if y < exy[1] + enemy_height:
                     #적과 전투기가 겹쳤다면
-                    if (y < exy[1] < y + fight_height) or (y < exy[1] + enemy_height < y + fight_height) and\
-                        (x < exy[0] < x + fight_width) or (x < exy[0] + enemy_width < x + fight_width):
+                    if ((y < exy[1] < y + fight_height) or (y < exy[1] + enemy_height < y + fight_height)) and\
+                        ((x < exy[0] < x + fight_width) or (x < exy[0] + enemy_width < x + fight_width)):
                         try:
                             enemy_xy[0].remove(exy) #적 제거
                         except:
