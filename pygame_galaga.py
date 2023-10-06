@@ -17,7 +17,8 @@ fight_width = 36    #갤럭시안 넓이
 fight_height = 38   #갤럭시안 높이
 enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
-score = [100, 120, 140, 160, 5000]  #적, 보스 스코어
+scoreList = [100, 120, 140, 160, 5000]  #적, 보스 스코어
+start_heart = 3
 
 #게임 오버 메세지
 def gameover():
@@ -28,22 +29,13 @@ def gameover():
     sleep(2)
     runGame()
 
-# 적을 맞춘 개수 계산(제거 예정)
+# 스코어 화면에 띄우기(제거 예정)
 def drawScore(count):
     global gamepad
 
     font = pygame.font.SysFont(None, 20)
-    text = font.render('Enemy Kills: ' + str(count), True, WHITE)
+    text = font.render('Score: ' + str(count), True, WHITE)
     gamepad.blit(text, (0, 0))
-
-#적을 보낸 개수 계산(제거 예정)
-def drawPassed(count):
-    global gamepad
-
-    font = pygame.font.SysFont(None, 20)
-    text = font.render('Enemy Passed: ' + str(count), True, RED)
-    gamepad.blit(text, (360, 0))
-
 
 # 화면에 글씨 보이게 하기
 def dispMessage(text):
@@ -72,7 +64,7 @@ def drawObject(obj, x, y):
 
 #갤러리안 구동 함수
 def playFighter():
-    global x
+    global x, y
     #갤러리안 좌표 이동
     #갤러리안이 벽에 충돌시 밖으로 나가지 않게 좌표 수정
     x += x_change
@@ -94,7 +86,7 @@ def playBullit():
     #갤러리안 무기 발사 구현
     if len(bullet_xy) != 0:
         #발사된 미사일 xy좌표를 차례로 가져와서 처리
-        for i, bxy in enumerate(bullet_xy):
+        for i, bxy in enumerate(bullet_xy): #bullet_xy 리스트 가져와서 for문 돌리기 -> i: 현재 접근중인 인덱스 번호, bxy: 현재 접근중인 요소(bullet의 xy 좌표 리스트)
             #미사일 y좌표 변경
             bxy[1] -= 10
             bullet_xy[i][1] = bxy[1]
@@ -122,11 +114,12 @@ def createEnemy0():
 #적0 구동 함수
 def playEnemy0(enemy0_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적0의 다음 레벨로 넘어가는 기준값보다 크다면
-    if time_now > nextLevel:
+    if time_now > nextLevel[0]:
         enemy_persentage[0]+10 #적0 등장확률 증가
         nextLevel[0]+=10    #적0 다음 레벨로 넘어가는 기준값 증가
-
-    if random.randrange(1, 100) > enemy_persentage[0]:  # 1~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
+    #적 생성
+    #if len(enemy_xy[0]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
+    if random.randrange(1, 100) < enemy_persentage[0]:  # 1~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
         createEnemy0()  #적0 생성 함수 실행
 
     for i, exy in enumerate(enemy_xy[0]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
@@ -157,6 +150,7 @@ def runGame():
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
     x_change = 0    #갤러리안의 x좌표 변화량
     y_change = 0    #갤러리안의 y좌표 변화량
+    heart = start_heart
 
     bullet_xy = []  #미사일 xy 좌표
     enemy_xy = [[], [], [], []]
@@ -227,18 +221,32 @@ def runGame():
         #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
         playEnemy0(enemy_speed[0], time.time()-startTime)
 
-        #적 격추 구현
-        #미사일과 적이 충돌시 미사일 제거
-        if bxy[1] < enemy_y:
-            if bxy[0] > enemy_x and bxy[0] < enemy_x + enemy_width:
-                bullet_xy.remove(bxy)
-
-        #갤러리안이 적과 충돌했는지 체크(적 격추부분으로 옮겨야함)
-        if y < enemy_y + enemy_height:
-            if (enemy_x > x and enemy_x < x + fight_width) or \
-                (enemy_x + enemy_width > x and enemy_x+ enemy_width < x + fight_width):
-                crash()
+        #충돌 처리
+        for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
+            for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
+                #갤러리안이 적과 충돌했는지 체크
+                if y < exy[1] + enemy_height:
+                    #적과 전투기가 겹쳤다면
+                    if (y < exy[1] < y + fight_height) or (y < exy[1] + enemy_height < y + fight_height) and\
+                        (x < exy[0] < x + fight_width) or (x < exy[0] + enemy_width < x + fight_width):
+                        try:
+                            enemy_xy[0].remove(exy) #적 제거
+                        except:
+                            pass
+                        crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
                 
+                #미사일이 적과 충돌했는지 체크
+                for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
+                    #미사일과 적이 충돌시 미사일 제거
+                    if bxy[1] < exy[1]:
+                        if exy[0] < bxy[0] < exy[0] + enemy_width:
+                            try:
+                                enemy_xy[0].remove(exy) #적 제거
+                                bullet_xy.remove(bxy)   #미사일 제거
+                            except:
+                                pass
+                            count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
+        drawScore(count)
         pygame.display.update() #화면 전체 업데이트
         clock.tick(60)  #프레임 초당 60fps 설정
 
@@ -252,9 +260,9 @@ def initGame():
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
-    fighter = pygame.image.load('Galaga\\fighter.png')    #갤러리안 이미지 설정
-    enemy = [pygame.image.load('Galaga\\enemy.png')]    #적 이미지 설정
-    bullet = pygame.image.load('Galaga\\bullet.png')  #미사일 이미지 설정
+    fighter = pygame.image.load('Galaga\\Image\\fighter.png')    #갤러리안 이미지 설정
+    enemy = [pygame.image.load('Galaga\\Image\\enemy.png')]    #적 이미지 설정
+    bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
         
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
