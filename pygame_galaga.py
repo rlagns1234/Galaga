@@ -17,6 +17,8 @@ fight_width = 36    #갤럭시안 넓이
 fight_height = 38   #갤럭시안 높이
 enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
+bullet_width = 4
+bullet_height = 20
 scoreList = [100, 120, 140, 160, 5000]  #적, 보스 스코어
 start_heart = 3
 
@@ -141,7 +143,7 @@ def playEnemy0(enemy0_speed, time_now):
 def runGame():
     global gamepad, fighter, clock
     global bullet, enemy
-    global enemy_xy, enemy_persentage, nextLevel
+    global enemy_xy, enemy_persentage, nextLevel, boss_xy
     global x_change, y_change, x, y, bullet_xy
 
     count = 0   #격추한 수
@@ -154,13 +156,17 @@ def runGame():
 
     bullet_xy = []  #미사일 xy 좌표
 
-    #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3
-    enemy_xy = [[], [], [], []]
-    enemy_speed = [3, 3, 3, 3] #적 스피드
-    enemy_persentage = [10, 10, 10 ,10]
-    nextLevel = [10, 10, 10, 10]
+    #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4
+    enemy_xy = [[], [], [], [], []]
+    enemy_speed = [3, 3, 3, 3, 3] #적 스피드
+    enemy_persentage = [10, 10, 10 ,10, 10]
+    nextLevel = [10, 10, 10, 10, 10]
 
     #보스 변수는 새로 생성해야함
+    boss_xy = [] #보스 [x,y] 설정
+
+    #적, 보스 발사체 리시트가 담긴 리스트, 보스 발사체는 발사체마다 새로 리스트 추가
+    ntt = [[],[],[]]  #인덱스 0~2: 각각 적0~2 발사체 리스트
         
     ongame = False
     onPause = False
@@ -231,8 +237,8 @@ def runGame():
                 #갤러리안이 적과 충돌했는지 체크
                 if y < exy[1] + enemy_height:
                     #적과 전투기가 겹쳤다면
-                    if ((y < exy[1] < y + fight_height) or (y < exy[1] + enemy_height < y + fight_height)) and\
-                        ((x < exy[0] < x + fight_width) or (x < exy[0] + enemy_width < x + fight_width)):
+                    if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
+                        ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
                         try:
                             enemy_xy[0].remove(exy) #적 제거
                         except:
@@ -243,7 +249,8 @@ def runGame():
                 for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
                     #미사일과 적이 충돌시 미사일 제거
                     if bxy[1] < exy[1]:
-                        if exy[0] < bxy[0] < exy[0] + enemy_width:
+                        if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
+                            ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1)):
                             try:
                                 enemy_xy[0].remove(exy) #적 제거
                                 bullet_xy.remove(bxy)   #미사일 제거
