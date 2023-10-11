@@ -112,7 +112,7 @@ def drawLife(n):
     global life
     #생명 크기 26x28
     paddingX = 0    #왼쪽에 표시된 생명 이미지 개수만큼 띄워야 하는 여백
-    for i in range(n):
+    for i in range(n):  #매개변수로 받은 남은 생명만큼(n) 반복
         drawObject(life, paddingX, pad_height-28)   #생명 그리기
         paddingX += 26  #여백 추가
 
@@ -129,10 +129,10 @@ def playLifeItem():
     elif((y+1 < life_xy[1] < y + fight_height-1) or (y+1 < life_xy[1] + lifeItem_height < y + fight_height-1)) and\
         ((x+1 < life_xy[0] < x + fight_width-1) or (x+1 < life_xy[0] + lifeItem_width < x + fight_width-1)):
         life_count += 1 #생명 아이템이 전투기와 닿았다면 생명 추가
-        life_play = False
+        life_play = False   #생명아이템 실행여부 거짓
     else:
         life_xy[1] += life_speed    #생명 아이템의 이동 속도만큼 y값 이동
-        drawObject(lifeItem, life_xy[0], life_xy[1])
+        drawObject(lifeItem, life_xy[0], life_xy[1])    #생명아이템 그리기
 
 # 적0 생성 함수
 def createEnemy0():
@@ -266,8 +266,8 @@ def runGame():
         playEnemy0(enemy_speed[0], time.time()-startTime)
 
         #생명 아이템 구동
-        if life_play == True:
-            playLifeItem()
+        if life_play == True:   #생명아이템 실행여부가 참이라면
+            playLifeItem()  #생명아이템 구동
 
         #충돌 처리
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
@@ -297,8 +297,8 @@ def runGame():
 
                             #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 5%)
                             if life_play == False and life_count < 3 and random.randrange(1, 100) < 6:
-                                life_play = True
-                                createLifeItem()
+                                life_play = True    #생명 아이템 실행중으로 전환
+                                createLifeItem()    #생명아이템 생성
                             #밑에다가 elif 문으로 다른 아이템 생성도 구현
 
                         except:
