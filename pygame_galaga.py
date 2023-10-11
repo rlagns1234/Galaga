@@ -13,14 +13,16 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 pad_width = 480     #화면 넓이
 pad_height = 640    #화면 높이
-fight_width = 36    #갤럭시안 넓이
-fight_height = 38   #갤럭시안 높이
+fight_width = 30    #갤럭시안 넓이
+fight_height = 32   #갤럭시안 높이
 enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
-bullet_width = 4
-bullet_height = 20
+bullet_width = 4    #미사일 넓이
+bullet_height = 20  #미사일 높이
 scoreList = [100, 120, 140, 160, 5000]  #적, 보스 스코어
-start_heart = 3
+start_life = 3 #시작 생명
+lifeItem_width = 18
+lifeItem_height = 18
 
 #게임 오버 메세지
 def gameover():
@@ -105,6 +107,33 @@ def playBullit():
         for bx, by in bullet_xy:
             drawObject(bullet, bx, by)
 
+#생명 표시
+def drawLife(n):
+    global life
+    #생명 크기 26x28
+    paddingX = 0    #왼쪽에 표시된 생명 이미지 개수만큼 띄워야 하는 여백
+    for i in range(n):
+        drawObject(life, paddingX, pad_height-28)   #생명 그리기
+        paddingX += 26  #여백 추가
+
+#생명 아이템 생성 함수
+def createLifeItem(): 
+    life_xy[0] = random.randrange(0, pad_width-lifeItem_width)    #생명 아이템 위치 랜덤 x좌표로 지정
+    life_xy[1] = 0  #생명 아이템 y 지정
+
+#생명 아이템 구동 함수
+def playLifeItem():
+    global life_play, life_count, x, y
+    if life_xy[1]+lifeItem_height >= pad_height:
+        life_play = False   #생명 아이템이 화면 밖으로 나갔다면 생명아이템 구동 중지
+    elif((y+1 < life_xy[1] < y + fight_height-1) or (y+1 < life_xy[1] + lifeItem_height < y + fight_height-1)) and\
+        ((x+1 < life_xy[0] < x + fight_width-1) or (x+1 < life_xy[0] + lifeItem_width < x + fight_width-1)):
+        life_count += 1 #생명 아이템이 전투기와 닿았다면 생명 추가
+        life_play = False
+    else:
+        life_xy[1] += life_speed    #생명 아이템의 이동 속도만큼 y값 이동
+        drawObject(lifeItem, life_xy[0], life_xy[1])
+
 # 적0 생성 함수
 def createEnemy0():
     enemy_x = random.randrange(0, pad_width-enemy_width)    #적 위치 랜덤 x좌표로 지정
@@ -126,25 +155,26 @@ def playEnemy0(enemy0_speed, time_now):
 
     for i, exy in enumerate(enemy_xy[0]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         #적0 y좌표 변경
-                exy[1] += enemy0_speed #적0의 스피드만큼 y값 이동
-                enemy_xy[0][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
+        exy[1] += enemy0_speed #적0의 스피드만큼 y값 이동
+        enemy_xy[0][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
                 
-                #적이 화면을 벗어났을경우 적0 리스트에서 제거
-                if exy[1] >= pad_height:
-                    try:
-                        enemy_xy[0].remove(exy)
-                    except:
-                        pass
-                #적0 xy리스트의 요소가 0개가 아닐시 적0 그리기
-                if len(enemy_xy[0]) != 0:
-                    drawObject(enemy[0], exy[0], exy[1])
+        #적이 화면을 벗어났을경우 적0 리스트에서 제거
+        if exy[1] >= pad_height:
+            try:
+                enemy_xy[0].remove(exy)
+            except:
+                pass
+        #적0 xy리스트의 요소가 0개가 아닐시 적0 그리기
+        if len(enemy_xy[0]) != 0:
+            drawObject(enemy[0], exy[0], exy[1])
 
 # 게임 실행 메인 함수
 def runGame():
     global gamepad, fighter, clock
-    global bullet, enemy
+    global bullet, enemy, life
     global enemy_xy, enemy_persentage, nextLevel, boss_xy
     global x_change, y_change, x, y, bullet_xy
+    global life_count, life_xy, life_speed, life_play
 
     count = 0   #격추한 수
 
@@ -152,14 +182,18 @@ def runGame():
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
     x_change = 0    #갤러리안의 x좌표 변화량
     y_change = 0    #갤러리안의 y좌표 변화량
-    heart = start_heart #갤러리안 생명
+
+    life_count = start_life #갤러리안 생명
+    life_xy = [0, 0]   #갤러리안 생명 x,y 좌표 [x,y]
+    life_play = 0   #생명 아이템이 화면에 생성되었는지 여부
+    life_speed = 2 #생명 아이템 이동 속도
 
     bullet_xy = []  #미사일 xy 좌표
 
     #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4
     enemy_xy = [[], [], [], [], []]
     enemy_speed = [3, 3, 3, 3, 3] #적 스피드
-    enemy_persentage = [10, 10, 10 ,10, 10]
+    enemy_persentage = [5, 10, 10 ,10, 10]
     nextLevel = [10, 10, 10, 10, 10]
 
     #보스 변수는 새로 생성해야함
@@ -231,11 +265,15 @@ def runGame():
         #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
         playEnemy0(enemy_speed[0], time.time()-startTime)
 
+        #생명 아이템 구동
+        if life_play == True:
+            playLifeItem()
+
         #충돌 처리
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
             for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
                 #갤러리안이 적과 충돌했는지 체크
-                if y < exy[1] + enemy_height:
+                if exy[1] < y < exy[1] + enemy_height :
                     #적과 전투기가 겹쳤다면
                     if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
                         ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
@@ -243,20 +281,30 @@ def runGame():
                             enemy_xy[0].remove(exy) #적 제거
                         except:
                             pass
-                        crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
+                        if life_count == 1:
+                            crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
+                        else:
+                            life_count -= 1
                 
                 #미사일이 적과 충돌했는지 체크
                 for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
                     #미사일과 적이 충돌시 미사일 제거
-                    if bxy[1] < exy[1]:
-                        if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
-                            ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1)):
-                            try:
-                                enemy_xy[0].remove(exy) #적 제거
-                                bullet_xy.remove(bxy)   #미사일 제거
-                            except:
-                                pass
-                            count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
+                    if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
+                        ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1)):
+                        try:
+                            enemy_xy[0].remove(exy) #적 제거
+                            bullet_xy.remove(bxy)   #미사일 제거
+
+                            #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 5%)
+                            if life_play == False and life_count < 3 and random.randrange(1, 100) < 6:
+                                life_play = True
+                                createLifeItem()
+                            #밑에다가 elif 문으로 다른 아이템 생성도 구현
+
+                        except:
+                            pass
+                        count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
+        drawLife(life_count)
         drawScore(count)
         pygame.display.update() #화면 전체 업데이트
         clock.tick(60)  #프레임 초당 60fps 설정
@@ -266,12 +314,14 @@ def runGame():
 #초기 설정
 def initGame():
     global gamepad, fighter, clock
-    global bullet, enemy
+    global bullet, enemy, life, lifeItem
 
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
     fighter = pygame.image.load('Galaga\\Image\\fighter.png')    #갤러리안 이미지 설정
+    life = pygame.image.load('Galaga\\Image\\life.png') #생명 이미지 설정
+    lifeItem = pygame.image.load('Galaga\\Image\\lifeItem.png') #생명 아이템 이미지 설정
     enemy = [pygame.image.load('Galaga\\Image\\enemy.png')]    #적 이미지 설정
     bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
         
