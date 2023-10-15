@@ -20,9 +20,11 @@ enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
 scoreList = [100, 120, 140, 160, 5000]  #적, 보스 스코어
-start_life = 3 #시작 생명
-lifeItem_width = 18
-lifeItem_height = 18
+start_life = 3  #시작 생명
+start_bQuantity = 1  #시작 미사일 수량
+start_bSpeed = 10    #시작 미사일 속도
+Item_width = 18 #아이템 높이
+Item_height = 18    #아이템 넓이
 
 #게임 오버 메세지
 def gameover():
@@ -68,7 +70,7 @@ def drawObject(obj, x, y):
 
 #갤러리안 구동 함수
 def playFighter():
-    global x, y
+    global x, y, fPass, fCount
     #갤러리안 좌표 이동
     #갤러리안이 벽에 충돌시 밖으로 나가지 않게 좌표 수정
     x += x_change
@@ -83,7 +85,14 @@ def playFighter():
     elif y > pad_height - fight_height:
         y = pad_height - fight_height
 
-    drawObject(fighter, x, y)   #갤러리안 그리기
+    if fPass == True:
+        fCount += 1
+        if 10 < fCount < 20:
+            drawObject(fighter, x, y)
+        elif fCount == 20:
+            fCount = 0
+    else:
+        drawObject(fighter, x, y)   #갤러리안 그리기
 
 #미사일 구동 함수
 def playBullit():
@@ -92,7 +101,7 @@ def playBullit():
         #발사된 미사일 xy좌표를 차례로 가져와서 처리
         for i, bxy in enumerate(bullet_xy): #bullet_xy 리스트 가져와서 for문 돌리기 -> i: 현재 접근중인 인덱스 번호, bxy: 현재 접근중인 요소(bullet의 xy 좌표 리스트)
             #미사일 y좌표 변경
-            bxy[1] -= 10
+            bxy[1] -= bullet_speed
             bullet_xy[i][1] = bxy[1]
             
             #미사일이 화면을 벗어났을경우 제거
@@ -107,6 +116,42 @@ def playBullit():
         for bx, by in bullet_xy:
             drawObject(bullet, bx, by)
 
+#미사일 속도 아이템 생성 함수
+def createSpeedItem(): 
+    bSpeed_xy[0] = random.randrange(0, pad_width-Item_width)    #미사일 속도 아이템 위치 랜덤 x좌표로 지정
+    bSpeed_xy[1] = 0  #미사일 속도 아이템 y 지정
+
+#미사일 속도 아이템 구동 함수
+def playSpeedItem():
+    global bSpeed_play, bullet_speed, x, y
+    if bSpeed_xy[1]+Item_height >= pad_height:
+        bSpeed_play = False   #미사일 속도 아이템이 화면 밖으로 나갔다면 속도 아이템 구동 중지
+    elif((y+1 < bSpeed_xy[1] < y + fight_height-1) or (y+1 < bSpeed_xy[1] + Item_height < y + fight_height-1)) and\
+        ((x+1 < bSpeed_xy[0] < x + fight_width-1) or (x+1 < bSpeed_xy[0] + Item_width < x + fight_width-1)):
+        bullet_speed += 5 #미사일 속도 아이템이 전투기와 닿았다면 속도 증가
+        bSpeed_play = False   #미사일 속도 아이템 실행여부 거짓
+    else:
+        bSpeed_xy[1] += item_speed    #미사일 속도 아이템의 이동 속도만큼 y값 이동
+        drawObject(bSpeedItem, bSpeed_xy[0], bSpeed_xy[1])    #미사일 속도 아이템 그리기
+
+#미사일 개수 아이템 생성 함수
+def createQuantityItem(): 
+    bQuantity_xy[0] = random.randrange(0, pad_width-Item_width)    #미사일 개수 아이템 위치 랜덤 x좌표로 지정
+    bQuantity_xy[1] = 0  #미사일 개수 아이템 y 지정
+
+#미사일 개수 아이템 구동 함수
+def playQuantityItem():
+    global bQuantity_play, bullet_quantity, x, y
+    if bQuantity_xy[1]+Item_height >= pad_height:
+        bQuantity_play = False   #미사일 개수 아이템이 화면 밖으로 나갔다면 개수 아이템 구동 중지
+    elif((y+1 < bQuantity_xy[1] < y + fight_height-1) or (y+1 < bQuantity_xy[1] + Item_height < y + fight_height-1)) and\
+        ((x+1 < bQuantity_xy[0] < x + fight_width-1) or (x+1 < bQuantity_xy[0] + Item_width < x + fight_width-1)):
+        bullet_quantity += 1 #미사일 개수 아이템이 전투기와 닿았다면 개수 증가
+        bQuantity_play = False   #미사일 개수 아이템 실행여부 거짓
+    else:
+        bQuantity_xy[1] += item_speed    #미사일 개수 아이템의 이동 개수 y값 이동
+        drawObject(bQuantityItem, bQuantity_xy[0], bQuantity_xy[1])    #미사일 개수 아이템 그리기
+
 #생명 표시
 def drawLife(n):
     global life
@@ -118,20 +163,20 @@ def drawLife(n):
 
 #생명 아이템 생성 함수
 def createLifeItem(): 
-    life_xy[0] = random.randrange(0, pad_width-lifeItem_width)    #생명 아이템 위치 랜덤 x좌표로 지정
+    life_xy[0] = random.randrange(0, pad_width-Item_width)    #생명 아이템 위치 랜덤 x좌표로 지정
     life_xy[1] = 0  #생명 아이템 y 지정
 
 #생명 아이템 구동 함수
 def playLifeItem():
     global life_play, life_count, x, y
-    if life_xy[1]+lifeItem_height >= pad_height:
+    if life_xy[1]+Item_height >= pad_height:
         life_play = False   #생명 아이템이 화면 밖으로 나갔다면 생명아이템 구동 중지
-    elif((y+1 < life_xy[1] < y + fight_height-1) or (y+1 < life_xy[1] + lifeItem_height < y + fight_height-1)) and\
-        ((x+1 < life_xy[0] < x + fight_width-1) or (x+1 < life_xy[0] + lifeItem_width < x + fight_width-1)):
+    elif((y+1 < life_xy[1] < y + fight_height-1) or (y+1 < life_xy[1] + Item_height < y + fight_height-1)) and\
+        ((x+1 < life_xy[0] < x + fight_width-1) or (x+1 < life_xy[0] + Item_width < x + fight_width-1)):
         life_count += 1 #생명 아이템이 전투기와 닿았다면 생명 추가
         life_play = False   #생명아이템 실행여부 거짓
     else:
-        life_xy[1] += life_speed    #생명 아이템의 이동 속도만큼 y값 이동
+        life_xy[1] += item_speed    #생명 아이템의 이동 속도만큼 y값 이동
         drawObject(lifeItem, life_xy[0], life_xy[1])    #생명아이템 그리기
 
 # 적0 생성 함수
@@ -170,11 +215,12 @@ def playEnemy0(enemy0_speed, time_now):
 
 # 게임 실행 메인 함수
 def runGame():
-    global gamepad, fighter, clock
+    global gamepad, fighter, clock, fPass, fCount
     global bullet, enemy, life
     global enemy_xy, enemy_persentage, nextLevel, boss_xy
     global x_change, y_change, x, y, bullet_xy
-    global life_count, life_xy, life_speed, life_play
+    global life_count, life_xy, item_speed, life_play
+    global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, bPersentage
 
     count = 0   #격추한 수
 
@@ -182,25 +228,36 @@ def runGame():
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
     x_change = 0    #갤러리안의 x좌표 변화량
     y_change = 0    #갤러리안의 y좌표 변화량
+    fPass = False   #무적 여부
+    fCrash = 0  #적이랑 갤러리안이랑 부딪힌 시간
+    fCount = 0  #무적시간 깜빡이는 프레임 조절용 카운트
 
     life_count = start_life #갤러리안 생명
-    life_xy = [0, 0]   #갤러리안 생명 x,y 좌표 [x,y]
-    life_play = 0   #생명 아이템이 화면에 생성되었는지 여부
-    life_speed = 2 #생명 아이템 이동 속도
+    life_xy = [0, 0]   #생명 아이템 x,y 좌표 [x,y]
+    life_play = False   #생명 아이템이 화면에 생성되었는지 여부
 
     bullet_xy = []  #미사일 xy 좌표
+    bullet_speed = start_bSpeed #미사일 이동 속도
+    bullet_quantity = start_bQuantity   #미사일 개수
+    bSpeed_xy = [0, 0]  #미사일 속도 증가 아이템 xy 좌표
+    bQuantity_xy = [0, 0]   #미사일 개수 증가 아이템 xy 좌표
+    bSpeed_play = False #미사일 속도 증가 아이템이 화면에 생성되었는지 여부
+    bQuantity_play = False  #미사일 개수 증가 아이템이 화면에 생성되었는지 여부
+
+    item_speed = 2 #아이템 이동 속도
+    bPersentage = 1000  #미사일 속도, 개수 퍼센테이지 계산용, 초기값: 0.1%
 
     #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4
     enemy_xy = [[], [], [], [], []]
     enemy_speed = [3, 3, 3, 3, 3] #적 스피드
-    enemy_persentage = [5, 10, 10 ,10, 10]
-    nextLevel = [10, 10, 10, 10, 10]
+    enemy_persentage = [5, 10, 10 ,10, 10]  #적 생성 확률 리스트
+    nextLevel = [10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 변수는 새로 생성해야함
     boss_xy = [] #보스 [x,y] 설정
 
     #적, 보스 발사체 리시트가 담긴 리스트, 보스 발사체는 발사체마다 새로 리스트 추가
-    ntt = [[],[],[]]  #인덱스 0~2: 각각 적0~2 발사체 리스트
+    ntt = [[],[],[]]  #인덱스 0~2: 각각 적0~2 발사체 리스트, 보스 발사체는 발사체 하나당 여기다 [] <-하나씩 생성하여 사용
         
     ongame = False
     onPause = False
@@ -227,7 +284,11 @@ def runGame():
                     if len(bullet_xy) < 100:    #미사일 xy좌표 저장값이 100개 이하라면
                         bullet_x = x + fight_width/2    #미사일의 x좌표를 갤러리안 이미지의 중앙으로 설정
                         bullet_y = y - fight_height     #미사일의 y좌표를 갤러리안의 y좌표로 설정
-                        bullet_xy.append([bullet_x, bullet_y])  #미사일의 xy좌표를 저장
+                        #미사일 개수에 따라 좌표 다르게 조정하여 미사일 개수대로 미사일 좌표 저장
+                        match bullet_quantity:
+                            case 1: bullet_xy.append([bullet_x, bullet_y])
+                            case 2: bullet_xy.append([bullet_x-5, bullet_y]); bullet_xy.append([bullet_x+5, bullet_y])
+                            case 3: bullet_xy.append([bullet_x, bullet_y]); bullet_xy.append([bullet_x-10, bullet_y]); bullet_xy.append([bullet_x+10, bullet_y])
 
                 #ESC를 누르면 종료
                 elif event.key == pygame.K_ESCAPE:
@@ -266,25 +327,44 @@ def runGame():
         playEnemy0(enemy_speed[0], time.time()-startTime)
 
         #생명 아이템 구동
-        if life_play == True:   #생명아이템 실행여부가 참이라면
-            playLifeItem()  #생명아이템 구동
+        if life_play == True:   #생명 아이템 실행여부가 참이라면
+            playLifeItem()  #생명 아이템 구동
+
+        #미사일 속도 아이템 구동
+        if bSpeed_play == True: #속도 아이템 실행여부가 참이라면
+            playSpeedItem() #속도 아이템 구동
+
+        #미사일 개수 아이템 구동
+        if bQuantity_play == True: #개수 아이템 실행여부가 참이라면
+            playQuantityItem() #개수 아이템 구동
+        
+        #미사일 아이템 퍼센테이지 증가
+        match time.time()-startTime:
+            case 30: bPersentage = 200  #게임 시작 30초 후에 0.5%
+            case 90: bPersentage = 100  #게임 시작 90초 후에 1%
+            case 120: bPersentage = 67  #게임 시작 120초 후에 약 1.5%
+            case 180: bPersentage = 50  #게임 시작 180초 후에 2%
 
         #충돌 처리
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
             for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
                 #갤러리안이 적과 충돌했는지 체크
-                if exy[1] < y < exy[1] + enemy_height :
-                    #적과 전투기가 겹쳤다면
-                    if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
-                        ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
-                        try:
-                            enemy_xy[0].remove(exy) #적 제거
-                        except:
-                            pass
-                        if life_count == 1:
-                            crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
-                        else:
-                            life_count -= 1
+                if time.time()-fCrash > 1:  #갤러리안이 적이랑 충돌 후 1초가 지났다면 충돌 처리 진행
+                    fPass = False   #무적시간 여부 거짓
+                    if exy[1] < y < exy[1] + enemy_height :
+                        #적과 전투기가 겹쳤다면
+                        if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
+                            ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
+                            try:
+                                enemy_xy[0].remove(exy) #적 제거
+                            except:
+                                pass
+                            fCrash = time.time()
+                            fPass = True    #무적시간 여부 참
+                            if life_count == 1:
+                                crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
+                            else:
+                                life_count -= 1
                 
                 #미사일이 적과 충돌했는지 체크
                 for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
@@ -295,12 +375,20 @@ def runGame():
                             enemy_xy[0].remove(exy) #적 제거
                             bullet_xy.remove(bxy)   #미사일 제거
 
-                            #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 5%)
-                            if life_play == False and life_count < 3 and random.randrange(1, 100) < 6:
+                            #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
+                            #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 1%)
+                            if life_play == False and life_count < 3 and random.randrange(1, 100) < 2:
                                 life_play = True    #생명 아이템 실행중으로 전환
                                 createLifeItem()    #생명아이템 생성
                             #밑에다가 elif 문으로 다른 아이템 생성도 구현
-
+                            #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/bPersentage*100%)
+                            elif bSpeed_play == False and bullet_speed < 20 and random.randrange(1, bPersentage) < 2:
+                                bSpeed_play = True  #미사일 속도 아이템 실행중으로 전환
+                                createSpeedItem()   #미사일 속도 아이템 생성
+                            #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/bPersentage*100%)
+                            elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(1, bPersentage) < 2:
+                                bQuantity_play = True  #미사일 개수 아이템 실행중으로 전환
+                                createQuantityItem()   #미사일 개수 아이템 생성
                         except:
                             pass
                         count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
@@ -313,8 +401,9 @@ def runGame():
 
 #초기 설정
 def initGame():
-    global gamepad, fighter, clock
-    global bullet, enemy, life, lifeItem
+    global gamepad, clock
+    global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
+    global enemy
 
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
@@ -324,6 +413,8 @@ def initGame():
     lifeItem = pygame.image.load('Galaga\\Image\\lifeItem.png') #생명 아이템 이미지 설정
     enemy = [pygame.image.load('Galaga\\Image\\enemy.png')]    #적 이미지 설정
     bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
+    bSpeedItem = pygame.image.load('Galaga\\Image\\speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load('Galaga\\Image\\quantity.png')  #미사일 이미지 설정
         
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
