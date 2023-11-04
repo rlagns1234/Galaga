@@ -19,7 +19,7 @@ enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
-scoreList = [100, 120, 140, 160, 5000]  #적, 보스 스코어
+scoreList = [100, 100, 100, 100, 100]  #적, 보스 스코어
 start_life = 3  #시작 생명
 start_bQuantity = 1  #시작 미사일 수량
 start_bSpeed = 10    #시작 미사일 속도
@@ -183,7 +183,7 @@ def playLifeItem():
 def createEnemy0():
     enemy_x = random.randrange(0, pad_width-enemy_width)    #적 위치 랜덤 x좌표로 지정
     enemy_y = 0 #적 y 지정
-    for i in range(5):
+    for i in range(3):
         enemy_xy[0].append([enemy_x, enemy_y])  #적 xy좌표 리스트 적0 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
         enemy_y += -(enemy_height+5)    #맨 앞 적 뒤에 따라 나오는 적들 y값 (바로 앞의 적 y값) - (적 세로 높이+간격)으로 설정, 더 큰 음수로 설정하는 좌표상 더 위에 생성해야해서
 
@@ -195,7 +195,7 @@ def playEnemy0(enemy0_speed, time_now):
         nextLevel[0]+=10    #적0 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[0]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
-    if random.randrange(1, 100) < enemy_persentage[0]:  # 1~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
+    if random.randrange(0, 100) < enemy_persentage[0]:  # 0~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
         createEnemy0()  #적0 생성 함수 실행
 
     for i, exy in enumerate(enemy_xy[0]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
@@ -211,7 +211,245 @@ def playEnemy0(enemy0_speed, time_now):
                 pass
         #적0 xy리스트의 요소가 0개가 아닐시 적0 그리기
         if len(enemy_xy[0]) != 0:
-            drawObject(enemy[0], exy[0], exy[1])
+            drawObject(enemy, exy[0], exy[1]) #이후 각 적마다 이미지 추가후 이미지 변경 
+
+# 적1 생성 함수
+def createEnemy1():
+    enemy_x = random.randrange(0, pad_width-enemy_width)    #적 위치 랜덤 x좌표로 지정
+    enemy_y = 0 #적 y 지정
+    enemy_z = 0 #적 방향 지정 (화면 좌측에선 1, 우측에선 -1)
+    if enemy_x<=pad_width/2:
+        enemy_z=1
+    else:
+        enemy_z=-1
+    for i in range(3):
+        enemy_xy[1].append([enemy_x, enemy_y, enemy_z])  #적 xy좌표 리스트 적1 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
+        enemy_y += -(enemy_height+5)    #맨 앞 적 뒤에 따라 나오는 적들 y값 (바로 앞의 적 y값) - (적 세로 높이+간격)으로 설정, 더 큰 음수로 설정하는 좌표상 더 위에 생성해야해서
+
+#적1 구동 함수
+def playEnemy1(enemy1_speed, time_now):
+    #현재 플레이 시간이 인자로 전달받은 적1의 다음 레벨로 넘어가는 기준값보다 크다면
+    if time_now > nextLevel[1]:
+        enemy_persentage[1]+10 #적1 등장확률 증가
+        nextLevel[1]+=10    #적1 다음 레벨로 넘어가는 기준값 증가
+    #적 생성
+    #if len(enemy_xy[1]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
+    if random.randrange(0, 100) < enemy_persentage[1]:  # 0~100 랜덤 돌려서 나온 숫자가 적1 퍼센테이지 값보다 높다면
+        createEnemy1()  #적1 생성 함수 실행
+
+    for i, exy in enumerate(enemy_xy[1]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
+        exy[1] += enemy1_speed #적1의 스피드만큼 y값 이동
+        if exy[1]>=3*pad_height/4:
+            exy[0]+=enemy1_speed*2*exy[2] #3/4 위치에서 3차 방향 전환
+        elif exy[1]>=pad_height/2:
+            exy[0]+=enemy1_speed*exy[2] #1/2 위치에서 2차 방향 전환
+        elif exy[1]>=pad_height/4:
+            exy[0]+=enemy1_speed/2*exy[2] #1/4 위치에서 1차 방향 전환
+        enemy_xy[1][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
+                
+        #적이 화면을 벗어났을경우 적1 리스트에서 제거
+        if exy[1] >= pad_height or exy[0]<=0 or exy[0]>=pad_width-10:
+            try:
+                enemy_xy[1].remove(exy)
+            except:
+                pass
+        #적1 xy리스트의 요소가 0개가 아닐시 적1 그리기
+        if len(enemy_xy[1]) != 0:
+            drawObject(enemy, exy[0], exy[1])
+
+# 적2 생성 함수
+def createEnemy2():
+    enemy_x = random.randrange(0, pad_width-enemy_width)    #적 위치 랜덤 x좌표로 지정
+    enemy_y = 0 #적 y 지정
+    enemy_z = 0 #적 방향 지정 (화면 좌측에선 1, 우측에선 -1)
+    if enemy_x<=pad_width/2:
+        enemy_z=1
+    else:
+        enemy_z=-1
+    for i in range(3):
+        enemy_xy[2].append([enemy_x, enemy_y, enemy_z])  #적 xy좌표 리스트 적2 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
+        enemy_y += -(enemy_height+5)    #맨 앞 적 뒤에 따라 나오는 적들 y값 (바로 앞의 적 y값) - (적 세로 높이+간격)으로 설정, 더 큰 음수로 설정하는 좌표상 더 위에 생성해야해서
+
+#적2 구동 함수
+def playEnemy2(enemy2_speed, time_now):
+    #현재 플레이 시간이 인자로 전달받은 적2의 다음 레벨로 넘어가는 기준값보다 크다면
+    if time_now > nextLevel[2]:
+        enemy_persentage[2]+10 #적2 등장확률 증가
+        nextLevel[2]+=10    #적2 다음 레벨로 넘어가는 기준값 증가
+    #적 생성
+    #if len(enemy_xy[2]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
+    if random.randrange(0, 100) < enemy_persentage[2]:  # 0~100 랜덤 돌려서 나온 숫자가 적2 퍼센테이지 값보다 높다면
+        createEnemy2()  #적0 생성 함수 실행
+
+    for i, exy in enumerate(enemy_xy[2]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
+        #적0 y좌표 변경
+        exy[1] += enemy2_speed #적2의 스피드만큼 y값 이동
+        exy[0] += enemy2_speed * exy[2] #지정 방향으로 x값 이동
+        if exy[0]<=0 or exy[0]>=pad_width-10:
+            exy[2]*=-1 #벽에 닿으면 방향 반전
+        enemy_xy[2][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
+                
+        #적이 화면을 벗어났을경우 적2 리스트에서 제거
+        if exy[1] >= pad_height:
+            try:
+                enemy_xy[2].remove(exy)
+            except:
+                pass
+        #적2 xy리스트의 요소가 0개가 아닐시 적2 그리기
+        if len(enemy_xy[2]) != 0:
+            drawObject(enemy, exy[0], exy[1])
+
+# 적3 생성 함수
+def createEnemy3():
+    enemy_x = random.choice([0, pad_width-enemy_width])    #화면 양 끝 중 하나로 x좌표로 지정
+    enemy_y = random.randrange(pad_height/2, pad_height-enemy_height)  #적 위치 범위 내 랜덤 y좌표로 지정
+    enemy_z = 0 #적 방향 지정 (화면 좌측에선 1, 우측에선 -1)
+    if enemy_x<=pad_width/2:
+        enemy_z=1
+    else:
+        enemy_z=-1
+    for i in range(3):
+        enemy_xy[3].append([enemy_x, enemy_y, enemy_z])  #적 xy좌표 리스트 적3 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
+        enemy_x += enemy_z*(enemy_width+10) 
+        enemy_y += -(enemy_height+5)    #맨 앞 적 뒤에 따라 나오는 적들 y값 (바로 앞의 적 y값) - (적 세로 높이+간격)으로 설정, 더 큰 음수로 설정하는 좌표상 더 위에 생성해야해서
+
+#적3 구동 함수
+def playEnemy3(enemy3_speed, time_now):
+    #현재 플레이 시간이 인자로 전달받은 적3의 다음 레벨로 넘어가는 기준값보다 크다면
+    if time_now > nextLevel[3]:
+        enemy_persentage[3]+10 #적3 등장확률 증가
+        nextLevel[3]+=10    #적3 다음 레벨로 넘어가는 기준값 증가
+    #적 생성
+    #if len(enemy_xy[3]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
+    if random.randrange(0, 100) < enemy_persentage[3]:  # 1~100 랜덤 돌려서 나온 숫자가 적3 퍼센테이지 값보다 높다면
+        createEnemy3()  #적3 생성 함수 실행
+
+    for i, exy in enumerate(enemy_xy[3]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
+        
+        if exy[2]==1: #좌측에서 출발 시
+            if exy[0]<pad_width/2: #화면 가운데까지 우측으로 이동
+                exy[1] -= enemy3_speed/2
+                exy[0] += enemy3_speed
+            else: exy[2]=2
+        elif exy[2]==2: #↗
+            if exy[0]<3*pad_width/4:
+                exy[1] -= enemy3_speed
+                exy[0] += enemy3_speed
+            else: exy[2]=3
+        elif exy[2]==3: #↖
+            if exy[0]>pad_width/2:
+                exy[1] -= enemy3_speed
+                exy[0] -= enemy3_speed
+            else: exy[2]=4
+        elif exy[2]==4: #↙
+            if exy[0]>pad_width/4:
+                exy[1] += enemy3_speed
+                exy[0] -= enemy3_speed
+            else: exy[2]=5
+        elif exy[2]==5: #↘
+            if exy[0]<pad_width/2:
+                exy[1] += enemy3_speed
+                exy[0] += enemy3_speed
+            else: exy[2]=6
+        elif exy[2]==6: #화면 우측 바깥으로 이동
+            if exy[0]<pad_width-enemy_width:
+                exy[1] += enemy3_speed/2
+                exy[0] += enemy3_speed
+            else:
+                try:
+                    enemy_xy[3].remove(exy) #적이 화면을 벗어났을경우 적3 리스트에서 제거
+                except:
+                    pass
+        
+        if exy[2]==-1: #우측에서 출발 시
+            if exy[0]>pad_width/2: #화면 가운데까지 좌측으로 이동
+                exy[1] -= enemy3_speed/2
+                exy[0] -= enemy3_speed
+            else: exy[2]=-2
+        elif exy[2]==-2: #↖
+            if exy[0]>pad_width/4:
+                exy[1] -= enemy3_speed
+                exy[0] -= enemy3_speed
+            else: exy[2]=-3
+        elif exy[2]==-3: #↗
+            if exy[0]<pad_width/2:
+                exy[1] -= enemy3_speed
+                exy[0] += enemy3_speed
+            else: exy[2]=-4
+        elif exy[2]==-4: #↘
+            if exy[0]<3*pad_width/4:
+                exy[1] += enemy3_speed
+                exy[0] += enemy3_speed
+            else: exy[2]=-5
+        elif exy[2]==-5: #↙
+            if exy[0]>pad_width/2:
+                exy[1] += enemy3_speed
+                exy[0] -= enemy3_speed
+            else: exy[2]=-6
+        elif exy[2]==-6: #화면 좌측 바깥으로 이동
+            if exy[0]>0:
+                exy[1] += enemy3_speed/2
+                exy[0] -= enemy3_speed
+            else:
+                try:
+                    enemy_xy[3].remove(exy) #적이 화면을 벗어났을경우 적3 리스트에서 제거
+                except:
+                    pass
+                
+        #적이 화면을 벗어났을경우 적3 리스트에서 제거
+        if exy[1] >= pad_height:
+            try:
+                enemy_xy[3].remove(exy)
+            except:
+                pass
+        #적3 xy리스트의 요소가 0개가 아닐시 적3 그리기
+        if len(enemy_xy[3]) != 0:
+            drawObject(enemy, exy[0], exy[1])
+
+# 적4 생성 함수
+def createEnemy4():
+    enemy_x = random.randrange(0, pad_width-enemy_width)    #적 위치 랜덤 x좌표로 지정
+    enemy_y = 0 #적 y 지정
+    enemy_z = 0 #적 방향 지정 (화면 좌측에선 1, 우측에선 -1)
+    for i in range(1):
+        enemy_xy[4].append([enemy_x, enemy_y, enemy_z])  #적 xy좌표 리스트 적4 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
+        enemy_y += -(enemy_height+5)    #맨 앞 적 뒤에 따라 나오는 적들 y값 (바로 앞의 적 y값) - (적 세로 높이+간격)으로 설정, 더 큰 음수로 설정하는 좌표상 더 위에 생성해야해서
+
+#적4 구동 함수
+def playEnemy4(enemy4_speed, time_now):
+    #현재 플레이 시간이 인자로 전달받은 적4의 다음 레벨로 넘어가는 기준값보다 크다면
+    if time_now > nextLevel[4]:
+        enemy_persentage[4]+10 #적4 등장확률 증가
+        nextLevel[4]+=10    #적4 다음 레벨로 넘어가는 기준값 증가
+    #적 생성
+    #if len(enemy_xy[4]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
+    if random.randrange(0, 100) < enemy_persentage[4]:  # 1~100 랜덤 돌려서 나온 숫자가 적4 퍼센테이지 값보다 높다면
+        createEnemy4()  #적0 생성 함수 실행
+
+    for i, exy in enumerate(enemy_xy[4]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
+        #적4 y좌표 변경
+        #갤러리안과 떨어져 있다면 갤러리안의 x좌표를 향해 이동
+        if y-exy[1]>pad_height/4:
+            exy[1] += enemy4_speed #적4의 스피드만큼 y값 이동
+            if exy[0]<x:
+                exy[0] += enemy4_speed/2
+            elif exy[0]>x:
+                exy[0] -= enemy4_speed/2
+            else: pass
+        else:
+            exy[1] += enemy4_speed*2 #돌진
+
+        enemy_xy[4][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
+                
+        #적이 화면을 벗어났을경우 적4 리스트에서 제거
+        if exy[1] >= pad_height or exy[0]<=0 or exy[0]>=pad_width-10:
+            try:
+                enemy_xy[1].remove(exy)
+            except:
+                pass
+        #적4 xy리스트의 요소가 0개가 아닐시 적4 그리기
+        if len(enemy_xy[4]) != 0:
+            drawObject(enemy, exy[0], exy[1])
 
 # 게임 실행 메인 함수
 def runGame():
@@ -249,8 +487,8 @@ def runGame():
 
     #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4
     enemy_xy = [[], [], [], [], []]
-    enemy_speed = [3, 3, 3, 3, 3] #적 스피드
-    enemy_persentage = [5, 10, 10 ,10, 10]  #적 생성 확률 리스트
+    enemy_speed = [5, 5, 5, 5, 5] #적 스피드
+    enemy_persentage = [1, 1, 1, 1, 1]  #적 생성 확률 리스트
     nextLevel = [10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 변수는 새로 생성해야함
@@ -326,6 +564,18 @@ def runGame():
         #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
         playEnemy0(enemy_speed[0], time.time()-startTime)
 
+        #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy1(enemy_speed[1], time.time()-startTime)
+
+        #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy2(enemy_speed[2], time.time()-startTime)
+
+        #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy3(enemy_speed[3], time.time()-startTime)
+
+        #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy4(enemy_speed[4], time.time()-startTime)
+
         #생명 아이템 구동
         if life_play == True:   #생명 아이템 실행여부가 참이라면
             playLifeItem()  #생명 아이템 구동
@@ -356,7 +606,7 @@ def runGame():
                         if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
                             ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
                             try:
-                                enemy_xy[0].remove(exy) #적 제거
+                                eList.remove(exy) #적 제거
                             except:
                                 pass
                             fCrash = time.time()
@@ -372,7 +622,7 @@ def runGame():
                     if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
                         ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1)):
                         try:
-                            enemy_xy[0].remove(exy) #적 제거
+                            eList.remove(exy) #적 제거
                             bullet_xy.remove(bxy)   #미사일 제거
 
                             #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
@@ -408,13 +658,13 @@ def initGame():
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
-    fighter = pygame.image.load('Galaga\\Image\\fighter.png')    #갤러리안 이미지 설정
-    life = pygame.image.load('Galaga\\Image\\life.png') #생명 이미지 설정
-    lifeItem = pygame.image.load('Galaga\\Image\\lifeItem.png') #생명 아이템 이미지 설정
-    enemy = [pygame.image.load('Galaga\\Image\\enemy.png')]    #적 이미지 설정
-    bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
-    bSpeedItem = pygame.image.load('Galaga\\Image\\speed.png')  #미사일 이미지 설정
-    bQuantityItem = pygame.image.load('Galaga\\Image\\quantity.png')  #미사일 이미지 설정
+    fighter = pygame.image.load('fighter.png')    #갤러리안 이미지 설정
+    life = pygame.image.load('life.png') #생명 이미지 설정
+    lifeItem = pygame.image.load('lifeItem.png') #생명 아이템 이미지 설정
+    enemy = pygame.image.load('enemy.png')    #적 이미지 설정
+    bullet = pygame.image.load('bullet.png')  #미사일 이미지 설정
+    bSpeedItem = pygame.image.load('speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load('quantity.png')  #미사일 이미지 설정
         
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
