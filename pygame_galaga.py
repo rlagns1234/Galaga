@@ -348,7 +348,7 @@ def runGame():
         #충돌 처리
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
             for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
-                #갤러리안이 적과 충돌했는지 체크
+                #갤러리안이 적과 충돌했는지 체크, 나중에 발사체도 충돌했는지 체크해야함
                 if time.time()-fCrash > 1:  #갤러리안이 적이랑 충돌 후 1초가 지났다면 충돌 처리 진행
                     fPass = False   #무적시간 여부 거짓
                     if exy[1] < y < exy[1] + enemy_height :
