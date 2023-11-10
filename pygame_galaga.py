@@ -658,13 +658,13 @@ def initGame():
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
-    fighter = pygame.image.load('fighter.png')    #갤러리안 이미지 설정
-    life = pygame.image.load('life.png') #생명 이미지 설정
-    lifeItem = pygame.image.load('lifeItem.png') #생명 아이템 이미지 설정
-    enemy = pygame.image.load('enemy.png')    #적 이미지 설정
-    bullet = pygame.image.load('bullet.png')  #미사일 이미지 설정
-    bSpeedItem = pygame.image.load('speed.png')  #미사일 이미지 설정
-    bQuantityItem = pygame.image.load('quantity.png')  #미사일 이미지 설정
+    fighter = pygame.image.load('Galaga\\Image\\fighter.png')    #갤러리안 이미지 설정
+    life = pygame.image.load('Galaga\\Image\\life.png') #생명 이미지 설정
+    lifeItem = pygame.image.load('Galaga\\Image\\lifeItem.png') #생명 아이템 이미지 설정
+    enemy = pygame.image.load('Galaga\\Image\\enemy.png')    #적 이미지 설정
+    bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
+    bSpeedItem = pygame.image.load('Galaga\\Image\\speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load('Galaga\\Image\\quantity.png')  #미사일 이미지 설정
         
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
