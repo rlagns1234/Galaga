@@ -30,15 +30,6 @@ Item_height = 18    #아이템 넓이
 
 #추가한 것들
 enemy_bullet_speed = 8 #적5 미사일 속도
-enemybullet = pygame.image.load('Image\\enemybullet.png')  #적5 미사일 이미지 설정
-enemy5 = pygame.image.load('Image\\enemy5.png')    #적5 이미지 설정
-
-crash_sound = pygame.mixer.Sound("sound\\ost_003_Flag_Appears.mp3") #피격 사운드
-game_over = pygame.mixer.Sound("sound\\ost_004_Alien_Flying.mp3") #게임 오버 사운드
-shot = pygame.mixer.Sound("sound\\ost_005_Shot.mp3") #발사 사운드
-heart_up = pygame.mixer.Sound("sound\\ost_008_Hit_on_Boss_(1).mp3") #체력 회복 사운드
-quantity_up = pygame.mixer.Sound("sound\\ost_015_Challenging_Stage_Start.mp3") #미사일 개수 증가 사운드
-speed_up = pygame.mixer.Sound("sound\\ost_018_Extend.mp3") #스피드 증가 사운드
 
 #게임 오버 메세지
 def gameover():
@@ -746,18 +737,29 @@ def runGame():
 def initGame():
     global gamepad, clock
     global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
-    global enemy
+    global enemy, enemybullet, enemy5
+    global crash_sound, game_over, shot, heart_up, quantity_up, speed_up
 
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
-    fighter = pygame.image.load('Image\\fighter.png')    #갤러리안 이미지 설정
-    life = pygame.image.load('Image\\life.png') #생명 이미지 설정
-    lifeItem = pygame.image.load('Image\\lifeitem.png') #생명 아이템 이미지 설정
-    enemy = pygame.image.load('Image\\enemy.png')    #적 이미지 설정
-    bullet = pygame.image.load('Image\\bullet.png')  #미사일 이미지 설정
-    bSpeedItem = pygame.image.load('Image\\speed.png')  #미사일 이미지 설정
-    bQuantityItem = pygame.image.load('Image\\quantity.png')  #미사일 이미지 설정
+
+    crash_sound = pygame.mixer.Sound("Galaga\\sound\\ost_003_Flag_Appears.mp3") #피격 사운드
+    game_over = pygame.mixer.Sound("Galaga\\sound\\ost_004_Alien_Flying.mp3") #게임 오버 사운드
+    shot = pygame.mixer.Sound("Galaga\\sound\\ost_005_Shot.mp3") #발사 사운드
+    heart_up = pygame.mixer.Sound("Galaga\\sound\\ost_008_Hit_on_Boss_(1).mp3") #체력 회복 사운드
+    quantity_up = pygame.mixer.Sound("Galaga\\sound\\ost_015_Challenging_Stage_Start.mp3") #미사일 개수 증가 사운드
+    speed_up = pygame.mixer.Sound("Galaga\\sound\\ost_018_Extend.mp3") #스피드 증가 사운드
+
+    enemybullet = pygame.image.load('Galaga\\Image\\enemybullet.png')  #적5 미사일 이미지 설정
+    enemy5 = pygame.image.load('Galaga\\Image\\enemy5.png')    #적5 이미지 설정
+    fighter = pygame.image.load('Galaga\\Image\\fighter.png')    #갤러리안 이미지 설정
+    life = pygame.image.load('Galaga\\Image\\life.png') #생명 이미지 설정
+    lifeItem = pygame.image.load('Galaga\\Image\\lifeitem.png') #생명 아이템 이미지 설정
+    enemy = pygame.image.load('Galaga\\Image\\enemy.png')    #적 이미지 설정
+    bullet = pygame.image.load('Galaga\\Image\\bullet.png')  #미사일 이미지 설정
+    bSpeedItem = pygame.image.load('Galaga\\Image\\speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load('Galaga\\Image\\quantity.png')  #미사일 이미지 설정
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
 
