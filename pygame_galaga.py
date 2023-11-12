@@ -33,6 +33,7 @@ start_bSpeed = 10    #시작 미사일 속도
 Item_width = 18 #아이템 높이
 Item_height = 18    #아이템 넓이
 enemy_bullet_speed = 10 #적5 미사일 속도
+Restart = 0 # 재시작 여부
 
 #게임 오버 메세지
 def gameover():
@@ -50,6 +51,17 @@ def drawScore(count):
     font = pygame.font.SysFont(None, 20)
     text = font.render('Score: ' + str(count), True, WHITE)
     gamepad.blit(text, (0, 0))
+
+# 시작 메시지 그리기
+def startMessage(text, size, font, color):
+    global gamepad
+
+    textfont = pygame.font.Font('freesansbold.ttf', font) #폰트 불러오기, 폰트 크기
+    text = textfont.render(text, True, color) #텍스트 생성(내용, Anti-aliasing 사용 여부, 텍스트 색상)
+    textpos = text.get_rect()   #텍스트 위치 가져오기
+    textpos.center = (pad_width/2, pad_height/2 + size)    #텍스트 중앙 좌표 지정
+    gamepad.blit(text, textpos) #텍스트 그리기(내용, 위치) 
+    pygame.display.update() #전체 업데이트
 
 # 화면에 글씨 보이게 하기
 def dispMessage(text):
@@ -70,6 +82,33 @@ def crash():
     #자동 재시작
     sleep(2)
     runGame()    
+
+#시작 화면 함수
+def start():
+    global Restart
+    if Restart == 0:
+        key = False
+        while True:
+            startMessage("Galaga", -150, 80, RED)
+            startMessage("press enter to start", 150, 45, WHITE)
+            drawObject(fighter, pad_width/2, pad_height/2-50)
+            drawObject(fighter, pad_width/2 - 50, pad_height/2-50)
+            drawObject(fighter, pad_width/2 - 26, pad_height/2)
+            drawObject(enemy3, pad_width/2-26, pad_height*0.1) #보스 이미지 넣기(?)
+            ongame = False
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN: #시작
+                        key = True
+                    elif event.key == pygame.K_ESCAPE: #종료
+                        ongame = True
+            if key:
+                break
+            elif ongame:
+                return True
+    else:
+        return False
+
 
 # 게임에 등장하는 객체를 그려줌
 def drawObject(obj, x, y):
@@ -521,7 +560,7 @@ def playEnemy5(enemy5_speed, time_now):
 # 게임 실행 메인 함수
 def runGame():
     global gamepad, fighter, clock, fPass, fCount
-    global bullet, enemy, life
+    global bullet, enemy, life, Restart
     global enemy_xy, enemy_persentage, nextLevel, boss_xy
     global x_change, y_change, x, y, bullet_xy
     global life_count, life_xy, item_speed, life_play
@@ -569,6 +608,10 @@ def runGame():
     ongame = False
     onPause = False
     startTime = time.time()
+
+    ongame = start()# 시작화면 실행
+    Restart = Restart + 1
+
     while not ongame:
         for event in pygame.event.get():    #키 이벤트 처리  
             if event.type == pygame.QUIT:   #화면 종료시
