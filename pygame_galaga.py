@@ -5,9 +5,14 @@ import pygame
 import random
 import logging
 import time
+import os
 from time import sleep
 
 pygame.init() #파이게임 초기화
+
+#이미지, 음향 파일 경로
+img_path = os.path.dirname(os.path.realpath(__file__))+'\Image\\'
+sound_path = os.path.dirname(os.path.realpath(__file__))+'\sound\\'
 
 # 게임에 사용되는 전역 변수 정의
 BLACK = (0, 0, 0)
@@ -744,26 +749,26 @@ def initGame():
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
 
-    crash_sound = pygame.mixer.Sound("sound\\ost_003_Flag_Appears.mp3") #피격 사운드
-    game_over = pygame.mixer.Sound("sound\\ost_004_Alien_Flying.mp3") #게임 오버 사운드
-    shot = pygame.mixer.Sound("sound\\ost_005_Shot.mp3") #발사 사운드
-    heart_up = pygame.mixer.Sound("sound\\ost_008_Hit_on_Boss_(1).mp3") #체력 회복 사운드
-    quantity_up = pygame.mixer.Sound("sound\\ost_015_Challenging_Stage_Start.mp3") #미사일 개수 증가 사운드
-    speed_up = pygame.mixer.Sound("sound\\ost_018_Extend.mp3") #스피드 증가 사운드
+    crash_sound = pygame.mixer.Sound(sound_path+"ost_003_Flag_Appears.mp3") #피격 사운드
+    game_over = pygame.mixer.Sound(sound_path+"ost_004_Alien_Flying.mp3") #게임 오버 사운드
+    shot = pygame.mixer.Sound(sound_path+"ost_005_Shot.mp3") #발사 사운드
+    heart_up = pygame.mixer.Sound(sound_path+"ost_008_Hit_on_Boss_(1).mp3") #체력 회복 사운드
+    quantity_up = pygame.mixer.Sound(sound_path+"ost_015_Challenging_Stage_Start.mp3") #미사일 개수 증가 사운드
+    speed_up = pygame.mixer.Sound(sound_path+"ost_018_Extend.mp3") #스피드 증가 사운드
 
-    enemybullet = pygame.image.load('Image\\enemybullet.png')  #적5 미사일 이미지 설정
-    enemy5 = pygame.image.load('Image\\enemy5.png')    #적5 이미지 설정
-    fighter = pygame.image.load('Image\\fighter.png')    #갤러리안 이미지 설정
-    life = pygame.image.load('Image\\life.png') #생명 이미지 설정
-    lifeItem = pygame.image.load('Image\\lifeitem.png') #생명 아이템 이미지 설정
-    enemy0 = pygame.image.load('Image\\enemy0.png')    #적0 이미지 설정
-    enemy1 = pygame.image.load('Image\\enemy1.png')    #적1 이미지 설정
-    enemy2 = pygame.image.load('Image\\enemy2.png')    #적2 이미지 설정
-    enemy3 = pygame.image.load('Image\\enemy3.png')    #적3 이미지 설정
-    enemy4 = pygame.image.load('Image\\enemy4.png')    #적4 이미지 설정
-    bullet = pygame.image.load('Image\\bullet.png')  #미사일 이미지 설정
-    bSpeedItem = pygame.image.load('Image\\speed.png')  #미사일 이미지 설정
-    bQuantityItem = pygame.image.load('Image\\quantity.png')  #미사일 이미지 설정
+    enemybullet = pygame.image.load(img_path+'enemybullet.png')  #적5 미사일 이미지 설정
+    enemy5 = pygame.image.load(img_path+'enemy5.png')    #적5 이미지 설정
+    fighter = pygame.image.load(img_path+'fighter.png')    #갤러리안 이미지 설정
+    life = pygame.image.load(img_path+'life.png') #생명 이미지 설정
+    lifeItem = pygame.image.load(img_path+'lifeitem.png') #생명 아이템 이미지 설정
+    enemy0 = pygame.image.load(img_path+'enemy0.png')    #적0 이미지 설정
+    enemy1 = pygame.image.load(img_path+'enemy1.png')    #적1 이미지 설정
+    enemy2 = pygame.image.load(img_path+'enemy2.png')    #적2 이미지 설정
+    enemy3 = pygame.image.load(img_path+'enemy3.png')    #적3 이미지 설정
+    enemy4 = pygame.image.load(img_path+'enemy4.png')    #적4 이미지 설정
+    bullet = pygame.image.load(img_path+'bullet.png')  #미사일 이미지 설정
+    bSpeedItem = pygame.image.load(img_path+'speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load(img_path+'quantity.png')  #미사일 이미지 설정
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
 
