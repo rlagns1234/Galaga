@@ -7,7 +7,6 @@ import logging
 import time
 import os
 from time import sleep
-import threading
 
 pygame.init() #파이게임 초기화
 
@@ -37,9 +36,9 @@ Item_height = 18    #아이템 넓이
 enemy_bullet_speed = 10 #적5 미사일 속도
 Restart = 0 # 재시작 여부
 
-rock_width = 100  #운석 넓이
-rock_height = 100 #운석 높이
-boss_width = 45   #보스 넓이
+laser_width = 25  #레이저 넓이
+laser_height = 640 #레이저 높이
+boss_width = 42   #보스 넓이
 boss_height = 45  #보스 높이
 curtain_height = 200 #장막 높이
 
@@ -565,116 +564,144 @@ def playEnemy5(enemy5_speed, time_now):
             drawObject(enemy5, exy[0], exy[1])
 
 
-# 보스 구동 함수
+# 보스 구동 함수 (패턴 조정 역할)
 def playboss():
-    global boss , boss_hp , boss_xy
-    drawObject(boss , boss_xy[0] , boss_xy[1])   # 보스 이미지 그려줌
-
-    #상시 적용 패턴(운석 , 탄막) 
+    global boss, boss_hp, time_stamp, time_stamp2, enemy_xy
+    boss_x = pad_width * 0.45       #보스의 x좌표
+    boss_y = 50                     #보스의 y좌표
+    enemy_xy[7].append([boss_x , boss_y]) #보스의 xy좌표 저장
+    drawObject(boss , enemy_xy[7][0][0] , enemy_xy[7][0][1]) #보스 그리기
     bosspattern1()
-    bosspattern3() 
-    #조건부 적용 패턴
-    if random.randrange(0 , 100) < 1:
-        bosspattern2()
-    if boss_hp == 5:      #보스 체력의 절반일때 장막패턴 사용
-        bosspattern4()
-    
+    bosspattern2()
+    bosspattern4()
 
-# 보스 패턴 1 (랜덤 위치에 수직 방향으로 운석 낙하)
-def createrock():
-    rock_x = random.randrange(0 , pad_width - rock_width)
-    rock_y = 0
-    for i in range(2):
-        ntt[1].append([rock_x , rock_y])
-        rock_x += pad_width - rock_x
-        
 
-def bosspattern1():
-    global rock , boss_xy
-    if random.randrange(0 , 100) < 1:
-        createrock()
-    for i, rxy in enumerate(ntt[1]):
-        if rxy[1] < pad_height:
-            rxy[1] += 10
-        if rxy[1] >= pad_height:
-            try:
-                ntt[1].remove(rxy)
-            except:
-                pass
-        if len(ntt[1]) != 0:
-            drawObject(rock , rxy[0] , rxy[1])
+
+def bosspattern1():      #레이저 구동
+    global enemy_xy, time_stamp1, laser_play, laser, pat1
+    laser_x = random.randrange(0 , pad_width - laser_width)
+    laser_y = 0
+    if pat1 == False:
+        time_stamp1 = time.time()
+        #laser_x = random.randrange(0 , pad_width - laser_width)
+        #laser_y = 0
+        enemy_xy[8].append([laser_x, laser_y])
+        pat1 = True
+    if 1 < time.time() - time_stamp1 < 2:
+        drawObject(pre_laser, enemy_xy[8][0][0], enemy_xy[8][0][1])
+    if 2 <= time.time() - time_stamp1 <= 3:           #사전 경고 1초 후에 레이저 시작
+        laser_play = True
+        drawObject(laser , enemy_xy[8][0][0] , enemy_xy[8][0][1])
+    if time.time() - time_stamp1 >= 3:            #2초동안 레이저 발사 후에 레이저 삭제
+        laser_play = False
+        enemy_xy[8].clear()
+        pat1 = False
+
     
-    
-# 보스 패턴 2 (탄막 패턴과 연계되는 보스의 x축 이동 패턴)
+# 보스 패턴 2 (돌진 후 탄막 패턴)
 def bosspattern2():
-    global boss_xy , boss
-    #랜덤 위치로 x축 이동
-    if random.randrange(0 , pad_width - boss_width) < boss_xy[0] :  #0부터 보스가 있을 수 있는 위치까지 랜덤하게 돌린 수가 보스의 x값보다 작다면
-        if boss_xy[0] <= 0:   #보스의 x값이 0보다 작게되면 0으로 고정하고
-            boss_xy[0] = 0
-        else:                 #아닐 시에 왼쪽으로 이동
-            boss_xy[0] -= 50
-    else:                                             #랜덤 수가 보스의 x값보다 크다면
-        if boss_xy[0] >= pad_width - boss_width:      #보스의 x값이 있을 수 있는 위치보다 크면 위치 고정
-            boss_xy[0] = pad_width - boss_width
+    global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height
+    boss_speed = 10
+    if pat2 == False:
+        time_stamp = time.time()
+        pat2 = True
+    if time.time() - time_stamp < 3:   #4초 동안 보스 x좌표가 갤러리안의 x좌표에 따라 움직임
+        if enemy_xy[7][0][0] < x:
+            enemy_xy[7][0][0] += boss_speed / 4    #뒤따라가는 식으로 구현하기 위해서 스피드 조절
+        elif enemy_xy[7][0][0] > x:
+            enemy_xy[7][0][0] -= boss_speed / 4
         else:
-            boss_xy[0] += 50   #아닐 시에 오른쪽으로 이동
+            enemy_xy[7][0][0] = x
+    elif 3 <= (time.time() - time_stamp) < 4:      #4초동안 x좌표를 따라가서 3초동안 돌진
+        enemy_xy[9].clear()
+        if enemy_xy[7][0][1] >= pad_height - boss_height:
+            enemy_xy[7][0][1] = pad_height - boss_height
+        else:
+            enemy_xy[7][0][1] += boss_speed
+        
+    elif 4 <= (time.time() - time_stamp) <= 20:     #복귀 및 다음 패턴을 위한 딜레이
+        if enemy_xy[7][0][1] > 50:
+            enemy_xy[7][0][1] -= boss_speed/2
+        else:
+            enemy_xy[7][0][1] = 50
+        if enemy_xy[7][0][0] < pad_width *0.45:
+            enemy_xy[7][0][0] += boss_speed/4
+        elif enemy_xy[7][0][0] > pad_width *0.45:
+            enemy_xy[7][0][0] -= boss_speed/4
+        else:
+            enemy_xy[7][0][0] = pad_width *0.45
+        if enemy_xy[7][0][0] == pad_width *0.45 and enemy_xy[7][0][1] == 50:
+            bosspattern3()
+        else: pass
+    elif time.time() - time_stamp > 20:
+        pat2 = False
 
+    
+   
 # 보스 패턴 3 (벽에서 튕기는 탄막 난사)
 def createbarrage():   #탄막 생성 함수
-    global boss_xy
-    barrage_x = boss_xy[0] + boss_width // 2
-    barrage_y = boss_xy[1] + boss_height
+    global enemy_xy, time_stamp
+    barrage_x = enemy_xy[7][0][0] + boss_width//2
+    barrage_y = enemy_xy[7][0][1] + boss_height
     barrage_z = 0
-    arrive_x = random.randrange(0 , pad_width)
+    arrive_x = random.randrange(0 , pad_width)   #탄막이 좌로 갈지 우로 갈지 랜덤으로 정해줌
     
-    if arrive_x <= boss_xy[0]:
+    if arrive_x <= barrage_x:
         barrage_z = 1
     else:
         barrage_z = -1
     for i in range(1):
-        ntt[0].append([barrage_x , barrage_y , barrage_z])
+        enemy_xy[9].append([barrage_x , barrage_y , barrage_z])
         #barrage_y += 30
 
 def bosspattern3():    # 탄막 구동 함수
-    global boss_xy
-    barrage_speed = 5        #탄막 속도
+    global enemy_xy, barrage_radius
+    barrage_speed = 3        #탄막 속도
     barrage_radius = 10      #탄막 넓이(원의 넓이)
 
     if random.randrange(0 , 100) < 5:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
         createbarrage()                 #탄막 생성
-    for i , bxy in enumerate(ntt[0]):
+    for i , bxy in enumerate(enemy_xy[9]):
         bxy[1] += barrage_speed    #탄막의 스피드만큼 y값 이동
-        bxy[0] += barrage_speed * bxy[2] #지정 방향으로 x값 이동
+        bxy[0] += barrage_speed*2 * bxy[2] #지정 방향으로 x값 이동
         if bxy[0]<=0 or bxy[0]>=pad_width-10:
             bxy[2]*=-1                 #벽에 닿으면 방향 반전
-        ntt[0][i][1] = bxy[1]  #전역변수 탄막 리스트에 변경된 y값 저장
+        enemy_xy[9][i][1] = bxy[1]  #전역변수 탄막 리스트에 변경된 y값 저장
 
         #탄막이 화면을 벗어났을경우 리스트에서 제거
         if bxy[1] >= pad_height:
             try:
-                ntt[0].remove(bxy)
+                enemy_xy[9].remove(bxy)
             except:
                 pass
-        if len(ntt[0]) != 0:
+        if len(enemy_xy[9]) != 0:
             pygame.draw.circle(gamepad, RED, (bxy[0], bxy[1]), barrage_radius)  #인덱스 2: 탄막 위치 , 인덱스 3: 탄막 크기(원의 반지름)
 
 # 보스 패턴 4 (화면 가리는 장막 설치) 
 def bosspattern4():
-    global curtain , boss_time
-    drawObject(curtain , 0 , pad_height//2)
-    
+    global curtain , boss_time, time_stamp2
+    curtain_x = 0
+    curtain_y = pad_height // 3
+    enemy_xy[10].append([curtain_x , curtain_y])
+    if int((time.time() - boss_time)) % 30 == 0 and (time.time() - boss_time) >= 30:     #30초마다 타임 스탬프 기록
+        time_stamp2 = time.time()
+    if (time.time() - time_stamp2) < 10:                           #10초동안 장막패턴 시전
+        drawObject(curtain, enemy_xy[10][0][0], enemy_xy[10][0][1])
+    if time.time() - time_stamp2 >= 10:
+        enemy_xy[10].clear()
+
+
 
 # 게임 실행 메인 함수
 def runGame():
     global gamepad, fighter, clock, fPass, fCount
-    global bullet, life, ntt, Restart
-    global enemy_xy, enemy_persentage, nextLevel, boss_xy
+    global bullet, life, Restart
+    global enemy_xy, enemy_persentage, nextLevel
     global x_change, y_change, x, y, bullet_xy
     global life_count, life_xy, item_speed, life_play
     global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, bPersentage
-    global boss, boss_play, boss_xy, boss_hp, boss_time
-
+    global boss, boss_play, boss_hp, boss_time
+    global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play
     count = 0   #격추한 수
 
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
@@ -701,20 +728,24 @@ def runGame():
     item_speed = 2 #아이템 이동 속도
     bPersentage = 1000  #미사일 속도, 개수 퍼센테이지 계산용, 초기값: 0.1%
 
-    #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4
-    enemy_xy = [[], [], [], [], [], [],[]]
+    #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4, 적5, 적5의 탄, 보스, 레이저, 탄막, 장막
+    enemy_xy = [[], [], [], [], [], [], [], [], [], [], []] 
     enemy_speed = [5, 5, 5, 5, 5, 3] #적 스피드
     enemy_persentage = [5, 2, 2, 2, 2, 1]  #적 생성 확률 리스트
     nextLevel = [30, 30, 30, 30, 30, 30]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 관련 변수
-    boss_xy = [pad_width*0.45 , 50] #보스 [x,y] 설정
     boss_hp = 10
     boss_play = False
-    laser_x = 0
-
-    #적, 보스 발사체 리시트가 담긴 리스트, 보스 발사체는 발사체마다 새로 리스트 추가
-    ntt = [[],[],[]]  #인덱스 0~2: 각각 적0~2 발사체 리스트, 보스 발사체는 발사체 하나당 여기다 [] <-하나씩 생성하여 사용
+    time_stamp = 0
+    time_stamp1 = 0
+    time_stamp2 = 0
+    pat1 = False
+    pat2 = False
+    pat3 = False
+    pat4 = False
+    laser_play = False
+    boss_time = 30
 
     Stop = False    
     ongame = False
@@ -790,37 +821,31 @@ def runGame():
         #미사일 구동
         playBullit()
 
-        #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy0(enemy_speed[0], time.time()-startTime)
-
-        #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy1(enemy_speed[1], time.time()-startTime)
-
-        #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy2(enemy_speed[2], time.time()-startTime)
-
-        #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy3(enemy_speed[3], time.time()-startTime)
-
-        #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy4(enemy_speed[4], time.time()-startTime)
-
-        #보스 구동
-        boss_time = 1
+        #적 및 보스 구동 (현재 시각 - 시작시각이 보스 등장 시간보다 작을 때 적 소환, 클 때 보스 소환)
         if time.time() - startTime > boss_time:    #특정 시간 이후에 보스 등장
             boss_play = True
-            playboss()
-        if boss_play == True:            #보스 등장 후에는 적이 나오지 않음
-            for i, eList in enumerate(enemy_xy):
-                for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
-                    eList.remove(exy)
+            playboss()    #시행 조건이 필요한 보스 패턴
+        else:
+            #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy0(enemy_speed[0], time.time()-startTime)
+
+            #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy1(enemy_speed[1], time.time()-startTime)
+
+            #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy2(enemy_speed[2], time.time()-startTime)
+
+            #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy3(enemy_speed[3], time.time()-startTime)
+
+            #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy4(enemy_speed[4], time.time()-startTime)
             
+            #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy5(enemy_speed[5], time.time()-startTime)
 
-        #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
-        #playEnemy5(enemy_speed[5], time.time()-startTime)
-
-        #적5 미사일 구동
-        #enemyBullit()
+            #적5 미사일 구동
+            enemyBullit()
 
         #생명 아이템 구동
         if life_play == True:   #생명 아이템 실행여부가 참이라면
@@ -842,118 +867,116 @@ def runGame():
             case 180: bPersentage = 50  #게임 시작 180초 후에 2%
 
         #충돌 처리
-        #갤러리안이 보스 패턴에 충돌할 때
-        if time.time() - fCrash > 1:
-            fPass =False
-            #if문 1,2줄은 보스와 직접충돌 조건, 3줄은 레이저와 충돌 조건 
-            if (((y+1 < boss_xy[1] < y + fight_height-1) or (y+1 < boss_xy[1] + boss_height < y + fight_height-1)) and\
-                ((x+1 < boss_xy[0] < x + fight_width-1) or (x+1 < boss_xy[0] + boss_width < x + fight_width-1))):
-                fCrash = time.time()
-                fPass = True
-                if life_count == 1:
-                    crash()
-                else:
-                    life_count -= 1
-        
-        for i , bxy in enumerate(ntt[0]):         #탄막에 대한 충돌처리
-            if time.time() - fCrash > 1:
-                fPass = False
-                if (y+1 < bxy[1] < y + fight_width) and (x+1 < bxy[0] < x + fight_width-1):
-                    try:
-                        ntt[0].remove(bxy)
-                    except:
-                        pass
-                    fCrash = time.time()
-                    fPass = True
-                    if life_count == 1:
-                        crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
-                    else:
-                        life_count -= 1
-        
-        for i , bxy in enumerate(ntt[1]):      #운석에 대한 충돌처리
-            if time.time() - fCrash > 1:
-                fPass = False
-                if ((y+1 < bxy[1] < y + fight_height-1) or (y+1 < bxy[1] + rock_height < y + fight_height-1))and\
-                    ((x+1 < bxy[0] < x + fight_width-1) or (x+1 < bxy[0] + rock_width < x + fight_width-1)):
-                    try:
-                        ntt[1].remove(bxy)
-                    except:
-                        pass
-                    fCrash = time.time()
-                    fPass = True
-                    if life_count == 1:
-                        crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
-                    else:
-                        life_count -= 1
-
-        for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
-            if ((boss_xy[1]+1 < bxy[1] < boss_xy[1] + boss_width-1) or (boss_xy[1]+1 < bxy[1]+bullet_width < boss_xy[1] + boss_width-1))and\
-                ((boss_xy[0]+1 < bxy[0] < boss_xy[0] + boss_width-1) or (boss_xy[0]+1 < bxy[0]+bullet_width < boss_xy[0] + boss_width-1)):
-                try:
-                    bullet_xy.remove(bxy)   #미사일 제거
-                    boss_hp -= 1           #보스 체력 1씩 감소
-                except:
-                    pass
-    
-        
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
             for j, exy in enumerate(eList): #적n의 리스트에서 xy좌표 리스트 가져오기, exy:[적x,적y]
                 #갤러리안이 적과 충돌했는지 체크
                 if time.time()-fCrash > 1:  #갤러리안이 적이랑 충돌 후 1초가 지났다면 충돌 처리 진행
                     fPass = False   #무적시간 여부 거짓
-                    if exy[1] < y < exy[1] + enemy_height :
-                        #적과 전투기가 겹쳤다면
-                        if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
-                            ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
-                            try:   
-                                eList.remove(exy) #적 제거
-                            except:
-                                pass
-                            if(i == 6):
-                                ebCrash = time.time()
-                                Stop = True
-                            else:    
-                                fCrash = time.time()
-                                crash_sound.play()
-                                fPass = True    #무적시간 여부 참
-                                if life_count == 1:
-                                    game_over.play()
-                                    crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
-                                else:
-                                    life_count -= 1
+                    if i == 10:
+                        pass
+                    else:
+                        if i <= 6:
+                            if exy[1] < y < exy[1] + enemy_height :
+                                #적이 전투기에 접근하면
+                                if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + enemy_height < y + fight_height-1)) and\
+                                ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + enemy_width < x + fight_width-1)):
+                                    try:   
+                                        eList.remove(exy) #적 제거
+                                    except:
+                                        pass
+                                    if(i == 6):
+                                        ebCrash = time.time()
+                                        Stop = True
+                                    else:    
+                                        fCrash = time.time()
+                                        crash_sound.play()
+                                        fPass = True    #무적시간 여부 참
+                                        if life_count == 1:
+                                            game_over.play()
+                                            crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
+                                        else:
+                                            life_count -= 1
+                        if i == 7:
+                            if exy[1] < y < exy[1] + boss_height:
+                                #보스가 전투기에 접근하면
+                                if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + boss_height < y + fight_height-1)) and\
+                                ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + boss_width < x + fight_width-1)):
+                                    fCrash = time.time()
+                                    crash_sound.play()
+                                    fPass = True
+                                    if life_count == 1:
+                                        game_over.play()
+                                        crash()
+                                    else:
+                                        life_count -= 1
+                        if i == 8:
+                            if laser_play == True:
+                                if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + laser_height < y + fight_height-1)) and\
+                                ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + laser_width < x + fight_width-1)):
+                                    fCrash = time.time()
+                                    crash_sound.play()
+                                    fPass = True
+                                    if life_count == 1:
+                                        game_over.play()
+                                        crash()
+                                    else:
+                                        life_count -= 1
+                        if i == 9:
+                            if ((y+1 < exy[1] < y + fight_height) and (x+1 < exy[0] < x + fight_width-1)):
+                                    fCrash = time.time()
+                                    crash_sound.play()
+                                    fPass = True
+                                    if life_count == 1:
+                                        game_over.play()
+                                        crash()
+                                    else:
+                                        life_count -= 1
+                            
 
                 #미사일이 적과 충돌했는지 체크
                 for k, bxy in enumerate(bullet_xy): #미사일 xy리스트에서 좌표 하나씩 가져오기, bxy:[미사일x,미사일y]
                     #미사일과 적이 충돌시 미사일 제거 // 보스와 충돌시 보스 체력 -1씩 감소
-                    if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
-                        ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1))and\
-                            (i != 6):
-                        try:
-                            eList.remove(exy) #적 제거
-                            bullet_xy.remove(bxy)   #미사일 제거
+                    if i <= 6:
+                        if ((exy[1]+1 < bxy[1] < exy[1] + enemy_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + enemy_width-1))and\
+                            ((exy[0]+1 < bxy[0] < exy[0] + enemy_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + enemy_width-1))and\
+                                (i != 6):
+                            try:
+                                eList.remove(exy) #적 제거
+                                bullet_xy.remove(bxy)   #미사일 제거
 
-                            #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
-                            if boss_play == False:
-                                #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 1%)
-                                if life_play == False and life_count < 3 and random.randrange(1, 100) < 100:
-                                    life_play = True    #생명 아이템 실행중으로 전환
-                                    createLifeItem()    #생명아이템 생성
-                                #밑에다가 elif 문으로 다른 아이템 생성도 구현
-                                #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/bPersentage*100%)
-                                elif bSpeed_play == False and bullet_speed < 20 and random.randrange(1, bPersentage) < 2:
-                                    bSpeed_play = True  #미사일 속도 아이템 실행중으로 전환
-                                    createSpeedItem()   #미사일 속도 아이템 생성
-                                #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/bPersentage*100%)
-                                elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(1, bPersentage) < 2:
-                                    bQuantity_play = True  #미사일 개수 아이템 실행중으로 전환
-                                    createQuantityItem()   #미사일 개수 아이템 생성
-                            else:
-                                life_play = False
-                                bSpeed_play = False
-                                bQuantity_play = False
-                        except:
-                            pass
-                        count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
+                                #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
+                                if boss_play == False:
+                                    #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 1%)
+                                    if life_play == False and life_count < 3 and random.randrange(1, 100) < 100:
+                                        life_play = True    #생명 아이템 실행중으로 전환
+                                        createLifeItem()    #생명아이템 생성
+                                    #밑에다가 elif 문으로 다른 아이템 생성도 구현
+                                    #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/bPersentage*100%)
+                                    elif bSpeed_play == False and bullet_speed < 20 and random.randrange(1, bPersentage) < 2:
+                                        bSpeed_play = True  #미사일 속도 아이템 실행중으로 전환
+                                        createSpeedItem()   #미사일 속도 아이템 생성
+                                    #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/bPersentage*100%)
+                                    elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(1, bPersentage) < 2:
+                                        bQuantity_play = True  #미사일 개수 아이템 실행중으로 전환
+                                        createQuantityItem()   #미사일 개수 아이템 생성
+                                else:
+                                    life_play = False
+                                    bSpeed_play = False
+                                    bQuantity_play = False
+                            except:
+                                pass
+                            count += scoreList[i]   #현재 접근중인 적의 타입에 따라 알맞은 점수를 추가
+                    elif i == 7:
+                        if ((exy[1]+1 < bxy[1] < exy[1] + boss_width-1) or (exy[1]+1 < bxy[1]+bullet_width < exy[1] + boss_width-1))and\
+                            ((exy[0]+1 < bxy[0] < exy[0] + boss_width-1) or (exy[0]+1 < bxy[0]+bullet_width < exy[0] + boss_width-1)):
+                            try:
+                                boss_hp -= 1
+                                bullet_xy.remove(bxy)
+                            except:
+                                pass
+                    else:
+                        pass
+
         drawLife(life_count)
         drawScore(count)
         if time.time() - ebCrash > 3:
@@ -969,7 +992,7 @@ def initGame():
     global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
     global enemy0, enemy1,enemy2,enemy3,enemy4, enemybullet, enemy5
     global crash_sound, game_over, shot, heart_up, quantity_up, speed_up
-    global boss, laser, pre_laser, curtain, rock
+    global boss, laser, pre_laser, curtain
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
@@ -996,7 +1019,6 @@ def initGame():
     boss = pygame.image.load(img_path+'boss.png') #보스 이미지 설정 (추가 해야됨)
     pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 (추가 해야됨)
     laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 (추가 해야됨)
-    rock = pygame.image.load(img_path+'rock.png') #운석 이미지 설정
     curtain = pygame.image.load(img_path+'curtain.png') #장막 이미지
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
