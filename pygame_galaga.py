@@ -371,10 +371,16 @@ def playEnemy2(enemy2_speed, time_now):
         #적0 y좌표 변경
         exy[1] += enemy2_speed/5 #적2의 스피드만큼 y값 이동
         exy[0] += (4*enemy2_speed/5) * exy[2] #지정 방향으로 x값 이동
-        if exy[0]<=0 or exy[0]>=pad_width-enemy_width:
-            exy[2]*=-1 #벽에 닿으면 방향 반전
+
+        if exy[0]<0 or exy[0]>pad_width-enemy_width:
+            #화면 탈출로 인한 끼임현상 방지
+            if exy[0]<0: exy[0]=0
+            if exy[0]>pad_width-enemy_width: exy[0]=pad_width-enemy_width
+            #벽에 닿으면 방향 반전
+            exy[2]*=-1 
         enemy_xy[2][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
-                
+        enemy_xy[2][i][2] = exy[2]  #전역변수 적 리스트에 변경된 방향 저장
+        
         #적이 화면을 벗어났을경우 적2 리스트에서 제거
         if exy[1] >= pad_height:
             try:
@@ -1003,10 +1009,12 @@ def initGame():
     global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
     global enemy0, enemy1,enemy2,enemy3,enemy4, enemybullet, enemy5
     global crash_sound, game_over, shot, heart_up, quantity_up, speed_up
+
     global boss, laser, pre_laser, curtain
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
+
     crash_sound = pygame.mixer.Sound(sound_path+"ost_003_Flag_Appears.mp3") #피격 사운드
     game_over = pygame.mixer.Sound(sound_path+"ost_004_Alien_Flying.mp3") #게임 오버 사운드
     shot = pygame.mixer.Sound(sound_path+"ost_005_Shot.mp3") #발사 사운드
@@ -1027,10 +1035,12 @@ def initGame():
     bullet = pygame.image.load(img_path+'bullet.png')  #미사일 이미지 설정
     bSpeedItem = pygame.image.load(img_path+'speed.png')  #미사일 이미지 설정
     bQuantityItem = pygame.image.load(img_path+'quantity.png')  #미사일 이미지 설정
+
     boss = pygame.image.load(img_path+'boss.png') #보스 이미지 설정 (추가 해야됨)
     pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 (추가 해야됨)
     laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 (추가 해야됨)
     curtain = pygame.image.load(img_path+'curtain.png') #장막 이미지
+
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
 
 
