@@ -358,10 +358,15 @@ def playEnemy2(enemy2_speed, time_now):
         #적0 y좌표 변경
         exy[1] += enemy2_speed/5 #적2의 스피드만큼 y값 이동
         exy[0] += (4*enemy2_speed/5) * exy[2] #지정 방향으로 x값 이동
-        if exy[0]<=0 or exy[0]>=pad_width-enemy_width:
-            exy[2]*=-1 #벽에 닿으면 방향 반전
+        if exy[0]<0 or exy[0]>pad_width-enemy_width:
+            #화면 탈출로 인한 끼임현상 방지
+            if exy[0]<0: exy[0]=0
+            if exy[0]>pad_width-enemy_width: exy[0]=pad_width-enemy_width
+            #벽에 닿으면 방향 반전
+            exy[2]*=-1 
         enemy_xy[2][i][1] = exy[1]  #전역변수 적 리스트에 변경된 y값 저장
-                
+        enemy_xy[2][i][2] = exy[2]  #전역변수 적 리스트에 변경된 방향 저장
+        
         #적이 화면을 벗어났을경우 적2 리스트에서 제거
         if exy[1] >= pad_height:
             try:
