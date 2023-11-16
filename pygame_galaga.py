@@ -26,7 +26,7 @@ enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
-scoreList = [100, 100, 100, 100, 100, 500, 0]  #적, 보스 스코어
+scoreList = [100, 120, 120, 300, 150, 500, 5000]  #적, 보스 스코어
 start_life = 3  #시작 생명
 start_bQuantity = 1  #시작 미사일 수량
 start_bSpeed = 10    #시작 미사일 속도
@@ -41,6 +41,8 @@ laser_height = 640 #레이저 높이
 boss_width = 42   #보스 넓이
 boss_height = 45  #보스 높이
 curtain_height = 200 #장막 높이
+
+startTime = 0
 
 # 스코어 화면에 띄우기(제거 예정)
 def drawScore(count):
@@ -96,7 +98,7 @@ def crash(count):
 
 #시작 화면 함수
 def start():
-    global Restart
+    global Restart, startTime
     if Restart == 0:
         key = False
         while True:
@@ -112,6 +114,7 @@ def start():
                     pygame.quit()   #게임 종료
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN: #시작
+                        startTime = time.time()
                         key = True
                     elif event.key == pygame.K_ESCAPE: #종료
                         pygame.quit()
@@ -277,7 +280,7 @@ def playEnemy0(enemy0_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적0의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[0]:
         enemy_persentage[0]+5 #적0 등장확률 증가
-        nextLevel[0]+=30    #적0 다음 레벨로 넘어가는 기준값 증가
+        nextLevel[0]+=20    #적0 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[0]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[0]:  # 0~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
@@ -316,7 +319,7 @@ def playEnemy1(enemy1_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적1의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[1]:
         enemy_persentage[1]+2 #적1 등장확률 증가
-        nextLevel[1]+=30    #적1 다음 레벨로 넘어가는 기준값 증가
+        nextLevel[1]+=20    #적1 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[1]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[1]:  # 0~100 랜덤 돌려서 나온 숫자가 적1 퍼센테이지 값보다 높다면
@@ -410,7 +413,7 @@ def playEnemy3(enemy3_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적3의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[3]:
         enemy_persentage[3]+=2 #적3 등장확률 증가
-        nextLevel[3]+=30    #적3 다음 레벨로 넘어가는 기준값 증가
+        nextLevel[3]+=20    #적3 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[3]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[3]:  # 1~100 랜덤 돌려서 나온 숫자가 적3 퍼센테이지 값보다 높다면
@@ -512,7 +515,7 @@ def playEnemy4(enemy4_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적4의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[4]:
         enemy_persentage[4]+=1 #적4 등장확률 증가
-        nextLevel[4]+=30    #적4 다음 레벨로 넘어가는 기준값 증가
+        nextLevel[4]+=20    #적4 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[4]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[4]:  # 1~100 랜덤 돌려서 나온 숫자가 적4 퍼센테이지 값보다 높다면
@@ -524,9 +527,9 @@ def playEnemy4(enemy4_speed, time_now):
         if y-exy[1]>pad_height/4:
             exy[1] += enemy4_speed #적4의 스피드만큼 y값 이동
             if exy[0]<x:
-                exy[0] += enemy4_speed/2
+                exy[0] += enemy4_speed
             elif exy[0]>x:
-                exy[0] -= enemy4_speed/2
+                exy[0] -= enemy4_speed
             else: pass
         else:
             exy[1] += enemy4_speed*2 #돌진
@@ -555,7 +558,7 @@ def playEnemy5(enemy5_speed, time_now):
     #현재 플레이 시간이 인자로 전달받은 적5의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[5]:
         enemy_persentage[5]+=0.5 #적5 등장확률 증가
-        nextLevel[5]+=30 #적5 다음 레벨로 넘어가는 기준값 증가
+        nextLevel[5]+=20 #적5 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[5]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[5]:  # 1~100 랜덤 돌려서 나온 숫자가 적5 퍼센테이지 값보다 높다면
@@ -706,12 +709,12 @@ def bosspattern4():
 
 # 게임 실행 메인 함수
 def runGame():
-    global gamepad, fighter, clock, fPass, fCount, ongame
+    global gamepad, fighter, clock, fPass, fCount, ongame, startTime
     global bullet, life, Restart
     global enemy_xy, enemy_persentage, nextLevel
     global x_change, y_change, x, y, bullet_xy
     global life_count, life_xy, item_speed, life_play
-    global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, bPersentage
+    global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, iPersentage
     global boss, boss_play, boss_hp, boss_time
     global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play
     count = 0   #격추한 수
@@ -738,13 +741,13 @@ def runGame():
     bQuantity_play = False  #미사일 개수 증가 아이템이 화면에 생성되었는지 여부
 
     item_speed = 2 #아이템 이동 속도
-    bPersentage = 1000  #미사일 속도, 개수 퍼센테이지 계산용, 초기값: 0.1%
+    iPersentage = 1  #미사일 속도, 개수 퍼센테이지 계산용, 초기값: 0.1%
 
     #적들 좌표, 속도, 확률, 다음레벨 리스트, 인덱스: 적0, 적1, 적2, 적3, 적4, 적5, 적5의 탄, 보스, 레이저, 탄막, 장막
     enemy_xy = [[], [], [], [], [], [], [], [], [], [], []] 
     enemy_speed = [5, 5, 5, 5, 5, 3] #적 스피드
     enemy_persentage = [5, 2, 2, 2, 2, 1]  #적 생성 확률 리스트
-    nextLevel = [30, 30, 30, 30, 30, 30]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
+    nextLevel = [10, 10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 관련 변수
     boss_hp = 0
@@ -757,12 +760,12 @@ def runGame():
     pat3 = False
     pat4 = False
     laser_play = False
-    boss_time = 30
+    boss_time = 10
 
     Stop = False    
     ongame = False
     onPause = False
-    startTime = time.time()
+    pauseTime = 0   # 일시정지 1회당 시간, 시작 시간에서 일시정지 되었던 시간만큼 추가하여 플레이 시간 관리
 
     ongame = start()# 시작화면 실행
     Restart = Restart + 1
@@ -807,10 +810,14 @@ def runGame():
                 #엔터를 누를시 게임 일시정지/해제
                 elif event.key == pygame.K_RETURN:
                     if onPause == True:
+                        pauseTime = time.time() - pauseTime
+                        startTime += pauseTime
                         onPause = False
                     else :
                         dispMessage('Pause!')
+                        pauseTime = time.time()
                         onPause = True
+
             #키가 눌리지 않았을때(키 누른거 풀음)
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -871,12 +878,15 @@ def runGame():
         if bQuantity_play == True: #개수 아이템 실행여부가 참이라면
             playQuantityItem() #개수 아이템 구동
         
-        #미사일 아이템 퍼센테이지 증가
+        #아이템 퍼센테이지 변화
+        #미사일 속도 아이템은 확률*2
         match time.time()-startTime:
-            case 30: bPersentage = 200  #게임 시작 30초 후에 0.5%
-            case 90: bPersentage = 100  #게임 시작 90초 후에 1%
-            case 120: bPersentage = 67  #게임 시작 120초 후에 약 1.5%
-            case 180: bPersentage = 50  #게임 시작 180초 후에 2%
+            case 20: iPersentage = 2  #게임 시작 20초 후에 2%
+            case 40: iPersentage = 4  #게임 시작 40초 후에 4%
+            case 60: iPersentage = 8  #게임 시작 60초 후에 8%
+            case 80: iPersentage = 4  #게임 시작 80초 후에 4%
+            case 100: iPersentage = 2  #게임 시작 100초 후에 2%
+            case 120: iPersentage = 0  #게임 시작 120초 후에 0%
 
         #충돌 처리
         for i, eList in enumerate(enemy_xy):    #적 전체 xy 리스트에서 적0~3 xy 리스트 하나씩 가져오기, enumerate 설명은 97줄 참고
@@ -963,16 +973,16 @@ def runGame():
                                 #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
                                 if boss_play == False:
                                     #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 1%)
-                                    if life_play == False and life_count < 3 and random.randrange(1, 100) < 100:
+                                    if life_play == False and life_count < 3 and random.randrange(0, 100) < iPersentage:
                                         life_play = True    #생명 아이템 실행중으로 전환
                                         createLifeItem()    #생명아이템 생성
                                     #밑에다가 elif 문으로 다른 아이템 생성도 구현
                                     #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/bPersentage*100%)
-                                    elif bSpeed_play == False and bullet_speed < 20 and random.randrange(1, bPersentage) < 2:
+                                    if bSpeed_play == False and bullet_speed < 25 and random.randrange(0, 100) < iPersentage*2:
                                         bSpeed_play = True  #미사일 속도 아이템 실행중으로 전환
                                         createSpeedItem()   #미사일 속도 아이템 생성
                                     #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/bPersentage*100%)
-                                    elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(1, bPersentage) < 2:
+                                    elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(0, 100) < iPersentage:
                                         bQuantity_play = True  #미사일 개수 아이템 실행중으로 전환
                                         createQuantityItem()   #미사일 개수 아이템 생성
                                 else:
