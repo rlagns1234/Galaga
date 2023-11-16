@@ -611,15 +611,18 @@ def playEnemy5(enemy5_speed, time_now):
             enemy5_count_0 = True
 
 
+
 # 보스 구동 함수 (패턴 조정 역할)
 def playboss():
-    global boss, boss_hp, time_stamp, time_stamp2, enemy_xy
+    global boss, boss_hp, time_stamp, time_stamp2, enemy_xy, bp3
+    bp3 = False
     boss_x = pad_width * 0.45       #보스의 x좌표
     boss_y = 50                     #보스의 y좌표
     enemy_xy[7].append([boss_x , boss_y]) #보스의 xy좌표 저장
     drawObject(boss , enemy_xy[7][0][0] , enemy_xy[7][0][1]) #보스 그리기
     bosspattern1()
     bosspattern2()
+    bosspattern3()
     bosspattern4()
 
 
@@ -647,133 +650,7 @@ def bosspattern1():      #레이저 구동
     
 # 보스 패턴 2 (돌진 후 탄막 패턴)
 def bosspattern2():
-    global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height
-    boss_speed = 9
-    if pat2 == False:
-        time_stamp = time.time()
-        pat2 = True
-    if time.time() - time_stamp < 3:   #4초 동안 보스 x좌표가 갤러리안의 x좌표에 따라 움직임
-        if enemy_xy[7][0][0] < x:
-            enemy_xy[7][0][0] += boss_speed / 3    #뒤따라가는 식으로 구현하기 위해서 스피드 조절
-        elif enemy_xy[7][0][0] > x:
-            enemy_xy[7][0][0] -= boss_speed / 3
-        else:
-            enemy_xy[7][0][0] = x
-    elif 3 <= (time.time() - time_stamp) < 3.5:      #4초동안 x좌표를 따라가서 3초동안 돌진
-        if enemy_xy[7][0][1] >= pad_height - boss_height:
-            enemy_xy[7][0][1] = pad_height - boss_height
-        else:
-            enemy_xy[7][0][1] += boss_speed * 2
-        
-    elif 3.5 <= (time.time() - time_stamp) <= 20:     #복귀 및 다음 패턴을 위한 딜레이
-        if enemy_xy[7][0][1] > 50:
-            enemy_xy[7][0][1] -= boss_speed/2
-        else:
-            enemy_xy[7][0][1] = 50
-        if enemy_xy[7][0][0] < pad_width *0.45:
-            enemy_xy[7][0][0] += boss_speed/3
-        elif enemy_xy[7][0][0] > pad_width *0.45:
-            enemy_xy[7][0][0] -= boss_speed/3
-        else:
-            enemy_xy[7][0][0] = pad_width *0.45
-        if enemy_xy[7][0][0] == pad_width *0.45 and enemy_xy[7][0][1] == 50:
-            bosspattern3()
-        else: pass
-    elif time.time() - time_stamp > 20:
-        pat2 = False
-        enemy_xy[9].clear()   
-   
-# 보스 패턴 3 (벽에서 튕기는 탄막 난사)
-def createbarrage():   #탄막 생성 함수
-    global enemy_xy, time_stamp
-    barrage_x = enemy_xy[7][0][0] + boss_width//2
-    barrage_y = enemy_xy[7][0][1] + boss_height
-    barrage_z = 0
-    barrage_s = random.randint(3 , 8)
-    arrive_x = random.randrange(0 , pad_width)   #탄막이 좌로 갈지 우로 갈지 랜덤으로 정해줌
-    
-    if arrive_x <= barrage_x:
-        barrage_z = 1
-    else:
-        barrage_z = -1
-    for i in range(1):
-        enemy_xy[9].append([barrage_x , barrage_y , barrage_z, barrage_s])
-
-def bosspattern3():    # 탄막 구동 함수
-    global enemy_xy, barrage_radius
-    #barrage_speed = 3        #탄막 속도
-    barrage_radius = 10      #탄막 넓이(원의 넓이)
-
-    if random.randrange(0 , 100) < 5:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
-        createbarrage()                 #탄막 생성
-    for i , bxy in enumerate(enemy_xy[9]):
-        bxy[1] += bxy[3]    #탄막의 스피드만큼 y값 이동
-        bxy[0] += bxy[3]*2 * bxy[2] #지정 방향으로 x값 이동
-        if bxy[0]<=0 or bxy[0]>=pad_width-10:
-            bxy[2]*=-1                 #벽에 닿으면 방향 반전
-        enemy_xy[9][i][1] = bxy[1]  #전역변수 탄막 리스트에 변경된 y값 저장
-
-        #탄막이 화면을 벗어났을경우 리스트에서 제거
-        if bxy[1] >= pad_height:
-            try:
-                enemy_xy[9].remove(bxy)
-            except:
-                pass
-        if len(enemy_xy[9]) != 0:
-            pygame.draw.circle(gamepad, RED, (bxy[0], bxy[1]), barrage_radius)  #인덱스 2: 탄막 위치 , 인덱스 3: 탄막 크기(원의 반지름)
-
-# 보스 패턴 4 (화면 가리는 장막 설치) 
-def bosspattern4():
-    global curtain , boss_time, time_stamp2
-    curtain_x = 0
-    curtain_y = pad_height // 3
-    enemy_xy[10].append([curtain_x , curtain_y])
-    if int((time.time() - boss_time)) % 30 == 0 and (time.time() - boss_time) >= 30:     #30초마다 타임 스탬프 기록
-        time_stamp2 = time.time()
-    if (time.time() - time_stamp2) < 10:                           #10초동안 장막패턴 시전
-        drawObject(curtain, enemy_xy[10][0][0], enemy_xy[10][0][1])
-    if time.time() - time_stamp2 >= 10:
-        enemy_xy[10].clear()
-
-
-
-# 보스 구동 함수 (패턴 조정 역할)
-def playboss():
-    global boss, boss_hp, time_stamp, time_stamp2, enemy_xy
-    boss_x = pad_width * 0.45       #보스의 x좌표
-    boss_y = 50                     #보스의 y좌표
-    enemy_xy[7].append([boss_x , boss_y]) #보스의 xy좌표 저장
-    drawObject(boss , enemy_xy[7][0][0] , enemy_xy[7][0][1]) #보스 그리기
-    bosspattern1()
-    bosspattern2()
-    bosspattern4()
-
-
-
-def bosspattern1():      #레이저 구동
-    global enemy_xy, time_stamp1, laser_play, laser, pat1
-    laser_x = random.randrange(0 , pad_width - laser_width)
-    laser_y = 0
-    if pat1 == False:
-        time_stamp1 = time.time()
-        #laser_x = random.randrange(0 , pad_width - laser_width)
-        #laser_y = 0
-        enemy_xy[8].append([laser_x, laser_y])
-        pat1 = True
-    if 1 < time.time() - time_stamp1 < 2:
-        drawObject(pre_laser, enemy_xy[8][0][0], enemy_xy[8][0][1])
-    if 2 <= time.time() - time_stamp1 <= 3:           #사전 경고 1초 후에 레이저 시작
-        laser_play = True
-        drawObject(laser , enemy_xy[8][0][0] , enemy_xy[8][0][1])
-    if time.time() - time_stamp1 >= 3:            #2초동안 레이저 발사 후에 레이저 삭제
-        laser_play = False
-        enemy_xy[8].clear()
-        pat1 = False
-
-    
-# 보스 패턴 2 (돌진 후 탄막 패턴)
-def bosspattern2():
-    global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height
+    global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height, bp3
     boss_speed = 10
     if pat2 == False:
         time_stamp = time.time()
@@ -790,7 +667,7 @@ def bosspattern2():
         if enemy_xy[7][0][1] >= pad_height - boss_height:
             enemy_xy[7][0][1] = pad_height - boss_height
         else:
-            enemy_xy[7][0][1] += boss_speed
+            enemy_xy[7][0][1] += boss_speed * 3
         
     elif 4 <= (time.time() - time_stamp) <= 20:     #복귀 및 다음 패턴을 위한 딜레이
         if enemy_xy[7][0][1] > 50:
@@ -804,8 +681,9 @@ def bosspattern2():
         else:
             enemy_xy[7][0][0] = pad_width *0.45
         if enemy_xy[7][0][0] == pad_width *0.45 and enemy_xy[7][0][1] == 50:
-            bosspattern3()
-        else: pass
+            bp3 = True
+        else: 
+            bp3 = False
     elif time.time() - time_stamp > 20:
         pat2 = False
 
@@ -817,6 +695,7 @@ def createbarrage():   #탄막 생성 함수
     barrage_x = enemy_xy[7][0][0] + boss_width//2
     barrage_y = enemy_xy[7][0][1] + boss_height
     barrage_z = 0
+    barrage_w = random.randrange(1, 10) #탄막 발사각 지정
     arrive_x = random.randrange(0 , pad_width)   #탄막이 좌로 갈지 우로 갈지 랜덤으로 정해줌
     
     if arrive_x <= barrage_x:
@@ -824,19 +703,19 @@ def createbarrage():   #탄막 생성 함수
     else:
         barrage_z = -1
     for i in range(1):
-        enemy_xy[9].append([barrage_x , barrage_y , barrage_z])
+        enemy_xy[9].append([barrage_x , barrage_y , barrage_z, barrage_w])
         #barrage_y += 30
 
 def bosspattern3():    # 탄막 구동 함수
-    global enemy_xy, barrage_radius
-    barrage_speed = 3        #탄막 속도
+    global enemy_xy, barrage_radius, bp3
+    barrage_speed = 5        #탄막 속도
     barrage_radius = 10      #탄막 넓이(원의 넓이)
 
-    if random.randrange(0 , 100) < 5:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
+    if random.randrange(0 , 100) < 5 and bp3 == True:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
         createbarrage()                 #탄막 생성
     for i , bxy in enumerate(enemy_xy[9]):
         bxy[1] += barrage_speed    #탄막의 스피드만큼 y값 이동
-        bxy[0] += barrage_speed*2 * bxy[2] #지정 방향으로 x값 이동
+        bxy[0] += ( bxy[3] - 1 ) * (barrage_speed / bxy[3]) * bxy[2] #지정 방향으로 x값 이동
         if bxy[0]<=0 or bxy[0]>=pad_width-10:
             bxy[2]*=-1                 #벽에 닿으면 방향 반전
         enemy_xy[9][i][1] = bxy[1]  #전역변수 탄막 리스트에 변경된 y값 저장
@@ -854,7 +733,7 @@ def bosspattern3():    # 탄막 구동 함수
 def bosspattern4():
     global curtain , boss_time, time_stamp2
     curtain_x = 0
-    curtain_y = pad_height // 3
+    curtain_y = pad_height // 2
     enemy_xy[10].append([curtain_x , curtain_y])
     if int((time.time() - boss_time)) % 30 == 0 and (time.time() - boss_time) >= 30:     #30초마다 타임 스탬프 기록
         time_stamp2 = time.time()
@@ -910,6 +789,7 @@ def runGame():
     #보스 관련 변수
     boss_hp = 0
     boss_play = False
+    elimit = False
     time_stamp = 0
     time_stamp1 = 0
     time_stamp2 = 0
@@ -1007,26 +887,27 @@ def runGame():
             
         if boss_play == True:
             playboss()    #보스 패턴 시작
-        #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy0(enemy_speed[0], time.time()-startTime)
+        else:
+            #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy0(enemy_speed[0], time.time()-startTime)
 
-        #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy1(enemy_speed[1], time.time()-startTime)
+            #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy1(enemy_speed[1], time.time()-startTime)
 
-        #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy2(enemy_speed[2], time.time()-startTime)
-        
-        #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy3(enemy_speed[3], time.time()-startTime)
-    
-        #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy4(enemy_speed[4], time.time()-startTime)
+            #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy2(enemy_speed[2], time.time()-startTime)
             
-        #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
-        playEnemy5(enemy_speed[5], time.time()-startTime)
+            #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy3(enemy_speed[3], time.time()-startTime)
+        
+            #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy4(enemy_speed[4], time.time()-startTime)
+                
+            #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
+            playEnemy5(enemy_speed[5], time.time()-startTime)
 
-            #적5 미사일 구동
-            enemyBullit()
+        #적5 미사일 구동
+        enemyBullit()
 
         #생명 아이템 구동
         if life_play == True:   #생명 아이템 실행여부가 참이라면
@@ -1077,18 +958,15 @@ def runGame():
                                         fPass = True    #무적시간 여부 참
                                         if life_count == 1:
                                             game_over.play()
-                                            crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
-                                        else:
                                             life_count -= 1
                                             ongame = True
-                                if len(exy) == 0:
-                                    boss_play = True
+                                        else:
+                                            life_count -= 1
                         if i == 7:
                             if exy[1] < y < exy[1] + boss_height:
                                 #보스가 전투기에 접근하면
                                 if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + boss_height < y + fight_height-1)) and\
                                 ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + boss_width//2 < x + fight_width-1)):
-
                                     fCrash = time.time()
                                     crash_sound.play()
                                     fPass = True
@@ -1117,8 +995,8 @@ def runGame():
                                     crash_sound.play()
                                     fPass = True
                                     if life_count == 1:
-                                        life_count -= 1
                                         game_over.play()
+                                        life_count -= 1
                                         ongame = True
                                     else:
                                         life_count -= 1
