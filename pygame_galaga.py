@@ -765,6 +765,7 @@ def runGame():
     Stop = False    
     ongame = False
     onPause = False
+    startTime = time.time()
     pauseTime = 0   # 일시정지 1회당 시간, 시작 시간에서 일시정지 되었던 시간만큼 추가하여 플레이 시간 관리
 
     ongame = start()# 시작화면 실행
