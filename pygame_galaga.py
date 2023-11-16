@@ -953,8 +953,8 @@ def runGame():
                                     crash_sound.play()
                                     fPass = True
                                     if life_count == 1:
-                                        life_count -= 1
                                         game_over.play()
+                                        life_count -= 1
                                         ongame = True
                                     else:
                                         life_count -= 1
