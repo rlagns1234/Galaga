@@ -41,6 +41,7 @@ laser_height = 640 #레이저 높이
 boss_width = 42   #보스 넓이
 boss_height = 45  #보스 높이
 curtain_height = 200 #장막 높이
+elimit = False
 
 #게임 오버 메세지
 def gameover():
@@ -101,7 +102,7 @@ def start():
             drawObject(fighter, pad_width/2, pad_height/2-50)
             drawObject(fighter, pad_width/2 - 50, pad_height/2-50)
             drawObject(fighter, pad_width/2 - 26, pad_height/2)
-            drawObject(enemy3, pad_width/2-26, pad_height*0.1) #보스 이미지 넣기(?)
+            drawObject(boss, pad_width/2-26, pad_height*0.1)
             ongame = False
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -268,13 +269,15 @@ def createEnemy0():
 
 #적0 구동 함수
 def playEnemy0(enemy0_speed, time_now):
+    global enemy0_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적0의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[0]:
         enemy_persentage[0]+5 #적0 등장확률 증가
         nextLevel[0]+=30    #적0 다음 레벨로 넘어가는 기준값 증가
     #적 생성
     #if len(enemy_xy[0]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
-    if random.randrange(0, 1000) < enemy_persentage[0]:  # 0~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
+    if random.randrange(0, 1000) < enemy_persentage[0] and elimit == False:  # 0~100 랜덤 돌려서 나온 숫자가 적0 퍼센테이지 값보다 높다면
+
         createEnemy0()  #적0 생성 함수 실행
 
     for i, exy in enumerate(enemy_xy[0]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
@@ -307,6 +310,7 @@ def createEnemy1():
 
 #적1 구동 함수
 def playEnemy1(enemy1_speed, time_now):
+    global enemy1_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적1의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[1]:
         enemy_persentage[1]+2 #적1 등장확률 증가
@@ -314,7 +318,10 @@ def playEnemy1(enemy1_speed, time_now):
     #적 생성
     #if len(enemy_xy[1]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[1]:  # 0~100 랜덤 돌려서 나온 숫자가 적1 퍼센테이지 값보다 높다면
-        createEnemy1()  #적1 생성 함수 실행
+        if elimit == False:
+            createEnemy1()  #적1 생성 함수 실행
+        else:
+            pass
 
     for i, exy in enumerate(enemy_xy[1]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         exy[1] += enemy1_speed #적1의 스피드만큼 y값 이동
@@ -335,6 +342,8 @@ def playEnemy1(enemy1_speed, time_now):
         #적1 xy리스트의 요소가 0개가 아닐시 적1 그리기
         if len(enemy_xy[1]) != 0:
             drawObject(enemy1, exy[0], exy[1])
+        elif time_now >= boss_time:
+            enemy1_count_0 = True
 
 # 적2 생성 함수
 def createEnemy2():
@@ -352,6 +361,7 @@ def createEnemy2():
 
 #적2 구동 함수
 def playEnemy2(enemy2_speed, time_now):
+    global enemy2_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적2의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[2]:
         enemy_persentage[2]+=2 #적2 등장확률 증가
@@ -359,7 +369,10 @@ def playEnemy2(enemy2_speed, time_now):
     #적 생성
     #if len(enemy_xy[2]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[2]:  # 0~100 랜덤 돌려서 나온 숫자가 적2 퍼센테이지 값보다 높다면
-        createEnemy2()  #적0 생성 함수 실행
+        if elimit == False:
+            createEnemy2()  #적0 생성 함수 실행
+        else:
+            pass
 
     for i, exy in enumerate(enemy_xy[2]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         #적0 y좌표 변경
@@ -378,6 +391,8 @@ def playEnemy2(enemy2_speed, time_now):
         #적2 xy리스트의 요소가 0개가 아닐시 적2 그리기
         if len(enemy_xy[2]) != 0:
             drawObject(enemy2, exy[0], exy[1])
+        elif time_now >= boss_time:
+            enemy2_count_0 = True
 
 # 적3 생성 함수
 def createEnemy3():
@@ -395,6 +410,7 @@ def createEnemy3():
 
 #적3 구동 함수
 def playEnemy3(enemy3_speed, time_now):
+    global enemy3_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적3의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[3]:
         enemy_persentage[3]+=2 #적3 등장확률 증가
@@ -402,7 +418,10 @@ def playEnemy3(enemy3_speed, time_now):
     #적 생성
     #if len(enemy_xy[3]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[3]:  # 1~100 랜덤 돌려서 나온 숫자가 적3 퍼센테이지 값보다 높다면
-        createEnemy3()  #적3 생성 함수 실행
+        if elimit == False:
+            createEnemy3()  #적3 생성 함수 실행
+        else:
+            pass
 
     for i, exy in enumerate(enemy_xy[3]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         
@@ -485,6 +504,8 @@ def playEnemy3(enemy3_speed, time_now):
         #적3 xy리스트의 요소가 0개가 아닐시 적3 그리기
         if len(enemy_xy[3]) != 0:
             drawObject(enemy3, exy[0], exy[1])
+        elif time_now >= boss_time:
+            enemy3_count_0 = True
 
 # 적4 생성 함수
 def createEnemy4():
@@ -497,6 +518,7 @@ def createEnemy4():
 
 #적4 구동 함수
 def playEnemy4(enemy4_speed, time_now):
+    global enemy4_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적4의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[4]:
         enemy_persentage[4]+=1 #적4 등장확률 증가
@@ -504,7 +526,10 @@ def playEnemy4(enemy4_speed, time_now):
     #적 생성
     #if len(enemy_xy[4]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[4]:  # 1~100 랜덤 돌려서 나온 숫자가 적4 퍼센테이지 값보다 높다면
-        createEnemy4()  #적0 생성 함수 실행
+        if elimit == False:
+            createEnemy4()  #적0 생성 함수 실행
+        else:
+            pass
 
     for i, exy in enumerate(enemy_xy[4]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         #적4 y좌표 변경
@@ -530,6 +555,8 @@ def playEnemy4(enemy4_speed, time_now):
         #적4 xy리스트의 요소가 0개가 아닐시 적4 그리기
         if len(enemy_xy[4]) != 0:
             drawObject(enemy4, exy[0], exy[1])
+        elif time_now >= boss_time:
+           enemy4_count_0 = True
 
 #적5 생성 함수
 def createEnemy5():
@@ -540,6 +567,7 @@ def createEnemy5():
     enemy_xy[5].append([enemy_x, enemy_y, enemy_z, enemy_t])  #적 xy좌표 리스트 적5 리스트 부분에 생성할 새로운 적의 xy 좌표 리스트 추가
 
 def playEnemy5(enemy5_speed, time_now):
+    global enemy5_count_0, elimit
     #현재 플레이 시간이 인자로 전달받은 적5의 다음 레벨로 넘어가는 기준값보다 크다면
     if time_now > nextLevel[5]:
         enemy_persentage[5]+=0.5 #적5 등장확률 증가
@@ -547,7 +575,10 @@ def playEnemy5(enemy5_speed, time_now):
     #적 생성
     #if len(enemy_xy[5]) == 0:  #적 생성 후 생성한 적이 사라질때까지 새로운 시퀀스를 생성하지 않을시 이 코드 추가
     if random.randrange(0, 1000) < enemy_persentage[5]:  # 1~100 랜덤 돌려서 나온 숫자가 적5 퍼센테이지 값보다 높다면
-        createEnemy5()
+        if elimit == False:
+            createEnemy5()
+        else:
+            pass
 
     for i, exy in enumerate(enemy_xy[5]):   #i: 현재 접근중인 인덱스값, exy: 현재 접근중인 적 좌표 리스트 [x,y]
         #적5 x값 변경
@@ -562,6 +593,8 @@ def playEnemy5(enemy5_speed, time_now):
         #적5 xy리스트의 요소가 0개가 아닐시 적5 그리기
         if len(enemy_xy[5]) != 0:
             drawObject(enemy5, exy[0], exy[1])
+        elif time_now >= boss_time:
+            enemy5_count_0 = True
 
 
 # 보스 구동 함수 (패턴 조정 역할)
@@ -601,33 +634,32 @@ def bosspattern1():      #레이저 구동
 # 보스 패턴 2 (돌진 후 탄막 패턴)
 def bosspattern2():
     global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height
-    boss_speed = 10
+    boss_speed = 9
     if pat2 == False:
         time_stamp = time.time()
         pat2 = True
     if time.time() - time_stamp < 3:   #4초 동안 보스 x좌표가 갤러리안의 x좌표에 따라 움직임
         if enemy_xy[7][0][0] < x:
-            enemy_xy[7][0][0] += boss_speed / 4    #뒤따라가는 식으로 구현하기 위해서 스피드 조절
+            enemy_xy[7][0][0] += boss_speed / 3    #뒤따라가는 식으로 구현하기 위해서 스피드 조절
         elif enemy_xy[7][0][0] > x:
-            enemy_xy[7][0][0] -= boss_speed / 4
+            enemy_xy[7][0][0] -= boss_speed / 3
         else:
             enemy_xy[7][0][0] = x
-    elif 3 <= (time.time() - time_stamp) < 4:      #4초동안 x좌표를 따라가서 3초동안 돌진
-        enemy_xy[9].clear()
+    elif 3 <= (time.time() - time_stamp) < 3.5:      #4초동안 x좌표를 따라가서 3초동안 돌진
         if enemy_xy[7][0][1] >= pad_height - boss_height:
             enemy_xy[7][0][1] = pad_height - boss_height
         else:
-            enemy_xy[7][0][1] += boss_speed
+            enemy_xy[7][0][1] += boss_speed * 2
         
-    elif 4 <= (time.time() - time_stamp) <= 20:     #복귀 및 다음 패턴을 위한 딜레이
+    elif 3.5 <= (time.time() - time_stamp) <= 20:     #복귀 및 다음 패턴을 위한 딜레이
         if enemy_xy[7][0][1] > 50:
             enemy_xy[7][0][1] -= boss_speed/2
         else:
             enemy_xy[7][0][1] = 50
         if enemy_xy[7][0][0] < pad_width *0.45:
-            enemy_xy[7][0][0] += boss_speed/4
+            enemy_xy[7][0][0] += boss_speed/3
         elif enemy_xy[7][0][0] > pad_width *0.45:
-            enemy_xy[7][0][0] -= boss_speed/4
+            enemy_xy[7][0][0] -= boss_speed/3
         else:
             enemy_xy[7][0][0] = pad_width *0.45
         if enemy_xy[7][0][0] == pad_width *0.45 and enemy_xy[7][0][1] == 50:
@@ -635,8 +667,7 @@ def bosspattern2():
         else: pass
     elif time.time() - time_stamp > 20:
         pat2 = False
-
-    
+        enemy_xy[9].clear()   
    
 # 보스 패턴 3 (벽에서 튕기는 탄막 난사)
 def createbarrage():   #탄막 생성 함수
@@ -644,6 +675,7 @@ def createbarrage():   #탄막 생성 함수
     barrage_x = enemy_xy[7][0][0] + boss_width//2
     barrage_y = enemy_xy[7][0][1] + boss_height
     barrage_z = 0
+    barrage_s = random.randint(3 , 8)
     arrive_x = random.randrange(0 , pad_width)   #탄막이 좌로 갈지 우로 갈지 랜덤으로 정해줌
     
     if arrive_x <= barrage_x:
@@ -651,19 +683,18 @@ def createbarrage():   #탄막 생성 함수
     else:
         barrage_z = -1
     for i in range(1):
-        enemy_xy[9].append([barrage_x , barrage_y , barrage_z])
-        #barrage_y += 30
+        enemy_xy[9].append([barrage_x , barrage_y , barrage_z, barrage_s])
 
 def bosspattern3():    # 탄막 구동 함수
     global enemy_xy, barrage_radius
-    barrage_speed = 3        #탄막 속도
+    #barrage_speed = 3        #탄막 속도
     barrage_radius = 10      #탄막 넓이(원의 넓이)
 
     if random.randrange(0 , 100) < 5:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
         createbarrage()                 #탄막 생성
     for i , bxy in enumerate(enemy_xy[9]):
-        bxy[1] += barrage_speed    #탄막의 스피드만큼 y값 이동
-        bxy[0] += barrage_speed*2 * bxy[2] #지정 방향으로 x값 이동
+        bxy[1] += bxy[3]    #탄막의 스피드만큼 y값 이동
+        bxy[0] += bxy[3]*2 * bxy[2] #지정 방향으로 x값 이동
         if bxy[0]<=0 or bxy[0]>=pad_width-10:
             bxy[2]*=-1                 #벽에 닿으면 방향 반전
         enemy_xy[9][i][1] = bxy[1]  #전역변수 탄막 리스트에 변경된 y값 저장
@@ -701,7 +732,7 @@ def runGame():
     global life_count, life_xy, item_speed, life_play
     global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, bPersentage
     global boss, boss_play, boss_hp, boss_time
-    global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play
+    global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play, elimit
     count = 0   #격추한 수
 
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
@@ -745,7 +776,7 @@ def runGame():
     pat3 = False
     pat4 = False
     laser_play = False
-    boss_time = 30
+    boss_time = 20
 
     Stop = False    
     ongame = False
@@ -822,30 +853,33 @@ def runGame():
         playBullit()
 
         #적 및 보스 구동 (현재 시각 - 시작시각이 보스 등장 시간보다 작을 때 적 소환, 클 때 보스 소환)
-        if time.time() - startTime > boss_time:    #특정 시간 이후에 보스 등장
-            boss_play = True
-            playboss()    #시행 조건이 필요한 보스 패턴
-        else:
-            #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy0(enemy_speed[0], time.time()-startTime)
-
-            #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy1(enemy_speed[1], time.time()-startTime)
-
-            #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy2(enemy_speed[2], time.time()-startTime)
-
-            #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy3(enemy_speed[3], time.time()-startTime)
-
-            #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy4(enemy_speed[4], time.time()-startTime)
+        if time.time()-startTime >= boss_time:
+            elimit = True
+            if(not enemy_xy[0] and not enemy_xy[1] and not enemy_xy[2] and not enemy_xy[3] and not enemy_xy[4] and not enemy_xy[5] and not enemy_xy[6]):
+                boss_play = True
             
-            #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
-            playEnemy5(enemy_speed[5], time.time()-startTime)
+        if boss_play == True:
+            playboss()    #보스 패턴 시작
+        #적0 구동 (적0 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy0(enemy_speed[0], time.time()-startTime)
 
-            #적5 미사일 구동
-            enemyBullit()
+        #적1 구동 (적1 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy1(enemy_speed[1], time.time()-startTime)
+
+        #적2 구동 (적2 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy2(enemy_speed[2], time.time()-startTime)
+
+        #적3 구동 (적3 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy3(enemy_speed[3], time.time()-startTime)
+
+        #적4 구동 (적4 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy4(enemy_speed[4], time.time()-startTime)
+            
+        #적5 구동 (적5 스피드, 플레이타임(현재시각-시작시간))
+        playEnemy5(enemy_speed[5], time.time()-startTime)
+
+        #적5 미사일 구동
+        enemyBullit()
 
         #생명 아이템 구동
         if life_play == True:   #생명 아이템 실행여부가 참이라면
@@ -896,11 +930,13 @@ def runGame():
                                             crash() #heart를 이용해서 생명 줄어드는 기능으로 바꿔야함. 생명 전부 소진시 게임오버
                                         else:
                                             life_count -= 1
+                                if len(exy) == 0:
+                                    boss_play = True
                         if i == 7:
                             if exy[1] < y < exy[1] + boss_height:
                                 #보스가 전투기에 접근하면
                                 if ((y+1 < exy[1] < y + fight_height)-1 or (y+1 < exy[1] + boss_height < y + fight_height-1)) and\
-                                ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + boss_width < x + fight_width-1)):
+                                ((x+1 < exy[0] < x + fight_width-1) or (x+1 < exy[0] + boss_width//2 < x + fight_width-1)):
                                     fCrash = time.time()
                                     crash_sound.play()
                                     fPass = True
