@@ -17,7 +17,6 @@ sound_path = os.path.dirname(os.path.realpath(__file__))+'\sound\\'
 # 게임에 사용되는 전역 변수 정의
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
-BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 pad_width = 480     #화면 넓이
 pad_height = 640    #화면 높이
@@ -27,8 +26,7 @@ enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
-scoreList = [10, 12, 12, 30, 15, 50, 10000]  #적, 보스 스코어
-
+scoreList = [100, 120, 120, 300, 150, 500, 5000]  #적, 보스 스코어
 start_life = 3  #시작 생명
 start_bQuantity = 1  #시작 미사일 수량
 start_bSpeed = 10    #시작 미사일 속도
@@ -43,28 +41,16 @@ laser_height = 640 #레이저 높이
 boss_width = 42   #보스 넓이
 boss_height = 45  #보스 높이
 curtain_height = 200 #장막 높이
+elimit = False
 startTime = 0
 
-# 스코어 화면에 띄우기
+# 스코어 화면에 띄우기(제거 예정)
 def drawScore(count):
     global gamepad
 
     font = pygame.font.SysFont(None, 20)
     text = font.render('Score: ' + str(count), True, WHITE)
     gamepad.blit(text, (0, 0))
-
-# 시간 화면에 띄우기
-def drawTime(time):
-    global gamepad
-    
-    min = str(int(time // 60)).zfill(2)
-    second = str(int((time % 60)//1)).zfill(2)
-    mSecond = str(int((time % 1) // 0.01)).zfill(2)
-    text = min+":"+second+":"+mSecond
-
-    font = pygame.font.SysFont(None, 20)
-    text = font.render('Time: ' + text, True, WHITE)
-    gamepad.blit(text, (385, 0))
 
 # 시작 메시지 그리기
 def startMessage(text, size, font, color):
@@ -88,12 +74,10 @@ def dispMessage(text):
     gamepad.blit(text, textpos) #텍스트 그리기(내용, 위치) 
     pygame.display.update() #전체 업데이트
 
-#게임오버 메세지
+#충돌 메세지(제거 예정)
 def crash(count):
     global gamepad
 
-    
-    game_over.play()
     sleep(2.5)
     gamepad.fill(BLACK) #배경 검은색으로 채우기
     startMessage('GameOver!', -100, 80, RED)
@@ -140,33 +124,7 @@ def start():
                 return True
     else:
         return False
-    
-#게임 클리어
-def clear(count, time):
-    game_clear.play()
-    sleep(2)
-    min = str(int(time // 60)).zfill(2)
-    second = str(int((time % 60)//1)).zfill(2)
-    mSecond = str(int((time % 1) // 0.01)).zfill(2)
 
-    text = min+":"+second+":"+mSecond
-    gamepad.fill(BLACK) #배경 검은색으로 채우기
-    startMessage("CLEAR!", -150, 80, BLUE)
-    sleep(2)
-    startMessage('Score: ' + str(count), -50, 45, WHITE)
-    sleep(1)
-    startMessage('Time: ' + text, 50, 45, WHITE)
-    sleep(1)
-    startMessage("press enter to restart", 150, 45, RED)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:   #화면 종료시
-                pygame.quit()   #게임 종료
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN: #재시작
-                    runGame()
-                elif event.key == pygame.K_ESCAPE: #종료
-                    pygame.quit()
 
 # 게임에 등장하는 객체를 그려줌
 def drawObject(obj, x, y):
@@ -258,8 +216,6 @@ def playSpeedItem():
         bullet_speed += 5 #미사일 속도 아이템이 전투기와 닿았다면 속도 증가
         speed_up.play()
         bSpeed_play = False   #미사일 속도 아이템 실행여부 거짓
-        for i in range(len(enemy_persentage)):
-            enemy_persentage[i] += 1
     else:
         bSpeed_xy[1] += item_speed    #미사일 속도 아이템의 이동 속도만큼 y값 이동
         drawObject(bSpeedItem, bSpeed_xy[0], bSpeed_xy[1])    #미사일 속도 아이템 그리기
@@ -279,8 +235,6 @@ def playQuantityItem():
         bullet_quantity += 1 #미사일 개수 아이템이 전투기와 닿았다면 개수 증가
         quantity_up.play()
         bQuantity_play = False   #미사일 개수 아이템 실행여부 거짓
-        for i in range(len(enemy_persentage)):
-            enemy_persentage[i] += 1
     else:
         bQuantity_xy[1] += item_speed    #미사일 개수 아이템의 이동 개수 y값 이동
         drawObject(bQuantityItem, bQuantity_xy[0], bQuantity_xy[1])    #미사일 개수 아이템 그리기
@@ -609,7 +563,7 @@ def playEnemy4(enemy4_speed, time_now):
         #적이 화면을 벗어났을경우 적4 리스트에서 제거
         if exy[1] >= pad_height or exy[0]<=0 or exy[0]>=pad_width-10:
             try:
-                enemy_xy[4].remove(exy)
+                enemy_xy[1].remove(exy)
             except:
                 pass
         #적4 xy리스트의 요소가 0개가 아닐시 적4 그리기
@@ -697,7 +651,7 @@ def bosspattern1():      #레이저 구동
 # 보스 패턴 2 (돌진 후 탄막 패턴)
 def bosspattern2():
     global enemy_xy , boss, pat2, time_stamp, x, y, pad_height, boss_height, bp3
-    boss_speed = 15
+    boss_speed = 10
     if pat2 == False:
         time_stamp = time.time()
         pat2 = True
@@ -753,9 +707,9 @@ def createbarrage():   #탄막 생성 함수
         #barrage_y += 30
 
 def bosspattern3():    # 탄막 구동 함수
-    global enemy_xy, barrage_radius, bp3, boss_bullet
-    barrage_speed = 10        #탄막 속도
-    barrage_radius = 15      #탄막 넓이(원의 넓이)
+    global enemy_xy, barrage_radius, bp3
+    barrage_speed = 5        #탄막 속도
+    barrage_radius = 10      #탄막 넓이(원의 넓이)
 
     if random.randrange(0 , 100) < 5 and bp3 == True:   #0부터 100까지 랜덤으로 돌린 수가 5보다 작을 때.
         createbarrage()                 #탄막 생성
@@ -773,7 +727,7 @@ def bosspattern3():    # 탄막 구동 함수
             except:
                 pass
         if len(enemy_xy[9]) != 0:
-            drawObject(boss_bullet, bxy[0], bxy[1])
+            pygame.draw.circle(gamepad, RED, (bxy[0], bxy[1]), barrage_radius)  #인덱스 2: 탄막 위치 , 인덱스 3: 탄막 크기(원의 반지름)
 
 # 보스 패턴 4 (화면 가리는 장막 설치) 
 def bosspattern4():
@@ -800,7 +754,6 @@ def runGame():
     global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, iPersentage
     global boss, boss_play, boss_hp, boss_time
     global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play, elimit
-    global count #격추한 수
     count = 0   #격추한 수
 
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
@@ -834,7 +787,7 @@ def runGame():
     nextLevel = [10, 10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 관련 변수
-    boss_hp = 400
+    boss_hp = 0
     boss_play = False
     elimit = False
     time_stamp = 0
@@ -845,7 +798,7 @@ def runGame():
     pat3 = False
     pat4 = False
     laser_play = False
-    boss_time = 120
+    boss_time = 10
 
     Stop = False    
     ongame = False
@@ -971,11 +924,11 @@ def runGame():
         #아이템 퍼센테이지 변화
         #미사일 속도 아이템은 확률*2
         match time.time()-startTime:
-            case 20: iPersentage = 1  #게임 시작 20초 후에 0.5%
-            case 40: iPersentage = 2  #게임 시작 40초 후에 1%
-            case 60: iPersentage = 3  #게임 시작 60초 후에 1.5%
-            case 80: iPersentage = 2  #게임 시작 80초 후에 1%
-            case 100: iPersentage = 1  #게임 시작 100초 후에 0.5%
+            case 20: iPersentage = 2  #게임 시작 20초 후에 2%
+            case 40: iPersentage = 4  #게임 시작 40초 후에 4%
+            case 60: iPersentage = 8  #게임 시작 60초 후에 8%
+            case 80: iPersentage = 4  #게임 시작 80초 후에 4%
+            case 100: iPersentage = 2  #게임 시작 100초 후에 2%
             case 120: iPersentage = 0  #게임 시작 120초 후에 0%
 
         #충돌 처리
@@ -1004,6 +957,7 @@ def runGame():
                                         crash_sound.play()
                                         fPass = True    #무적시간 여부 참
                                         if life_count == 1:
+                                            game_over.play()
                                             life_count -= 1
                                             ongame = True
                                         else:
@@ -1017,6 +971,7 @@ def runGame():
                                     crash_sound.play()
                                     fPass = True
                                     if life_count == 1:
+                                        game_over.play()
                                         life_count -= 1
                                         ongame = True
                                     else:
@@ -1029,6 +984,7 @@ def runGame():
                                     crash_sound.play()
                                     fPass = True
                                     if life_count == 1:
+                                        game_over.play()
                                         life_count -= 1
                                         ongame = True
                                     else:
@@ -1039,6 +995,7 @@ def runGame():
                                     crash_sound.play()
                                     fPass = True
                                     if life_count == 1:
+                                        game_over.play()
                                         life_count -= 1
                                         ongame = True
                                     else:
@@ -1058,16 +1015,16 @@ def runGame():
                                 #보스 타격시에는 아이템이 나오지 않게 조건 설정해야함
                                 if boss_play == False:
                                     #생명 아이템 생성 (생명 아이템이 생성되지 않았을 때, 생명이 3개 미만일때, 확률 1%)
-                                    if life_play == False and life_count < 3 and random.randrange(0, 200) < iPersentage:
+                                    if life_play == False and life_count < 3 and random.randrange(0, 100) < iPersentage:
                                         life_play = True    #생명 아이템 실행중으로 전환
                                         createLifeItem()    #생명아이템 생성
                                     #밑에다가 elif 문으로 다른 아이템 생성도 구현
-                                    #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/iPersentage*100%)
-                                    if bSpeed_play == False and bullet_speed < 25 and random.randrange(0, 200) < iPersentage:
+                                    #미사일 속도 아이템 생성 (미사일 속도 아이템이 생성되지 않았을 때, 미사일 속도가 25 미만일때, 확률 1/bPersentage*100%)
+                                    if bSpeed_play == False and bullet_speed < 25 and random.randrange(0, 100) < iPersentage*2:
                                         bSpeed_play = True  #미사일 속도 아이템 실행중으로 전환
                                         createSpeedItem()   #미사일 속도 아이템 생성
-                                    #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/iPersentage*100%)
-                                    elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(0, 200) < iPersentage:
+                                    #미사일 개수 아이템 생성 (미사일 개수 아이템이 생성되지 않았을 때, 미사일 개수 3개 미만일때, 확률 1/bPersentage*100%)
+                                    elif bQuantity_play == False and bullet_quantity < 3 and random.randrange(0, 100) < iPersentage:
                                         bQuantity_play = True  #미사일 개수 아이템 실행중으로 전환
                                         createQuantityItem()   #미사일 개수 아이템 생성
                                 else:
@@ -1083,40 +1040,35 @@ def runGame():
                             try:
                                 boss_hp -= 1
                                 bullet_xy.remove(bxy)
-                                if boss_hp <= 0:
-                                    ongame = True
                             except:
                                 pass
                     else:
                         pass
+                      
         drawLife(life_count)
         drawScore(count)
-        drawTime(time.time()-startTime)
         if time.time() - ebCrash > 3:
             Stop = False
         pygame.display.update() #화면 전체 업데이트
         if(ongame):
             break
         clock.tick(60)  #프레임 초당 60fps 설정
-    if boss_hp <= 0:
-        clear(count, time.time()-startTime)
-    else:
-        crash(count)
+    
+    crash(count)
 
 #초기 설정
 def initGame():
     global gamepad, clock
     global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
     global enemy0, enemy1,enemy2,enemy3,enemy4, enemybullet, enemy5
-    global crash_sound, game_over, shot, heart_up, quantity_up, speed_up, game_clear
-    global boss, laser, pre_laser, curtain, boss_bullet
+    global crash_sound, game_over, shot, heart_up, quantity_up, speed_up
+    global boss, laser, pre_laser, curtain
     
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
     pygame.display.set_caption('MyGalaga')  #게임 창 제목 설정
     crash_sound = pygame.mixer.Sound(sound_path+"ost_003_Flag_Appears.mp3") #피격 사운드
     game_over = pygame.mixer.Sound(sound_path+"ost_004_Alien_Flying.mp3") #게임 오버 사운드
-    game_clear = pygame.mixer.Sound(sound_path+"ost_016_Imperfect_Result_in_the_Challenging_Stage.mp3") #게임 오버 사운드
     shot = pygame.mixer.Sound(sound_path+"ost_005_Shot.mp3") #발사 사운드
     heart_up = pygame.mixer.Sound(sound_path+"ost_008_Hit_on_Boss_(1).mp3") #체력 회복 사운드
     quantity_up = pygame.mixer.Sound(sound_path+"ost_015_Challenging_Stage_Start.mp3") #미사일 개수 증가 사운드
@@ -1133,13 +1085,12 @@ def initGame():
     enemy3 = pygame.image.load(img_path+'enemy3.png')    #적3 이미지 설정
     enemy4 = pygame.image.load(img_path+'enemy4.png')    #적4 이미지 설정
     bullet = pygame.image.load(img_path+'bullet.png')  #미사일 이미지 설정
-    bSpeedItem = pygame.image.load(img_path+'speed.png')  #미사일 속도 아이템 이미지 설정
-    bQuantityItem = pygame.image.load(img_path+'quantity.png')  #미사일 수량 아이템 이미지 설정
+    bSpeedItem = pygame.image.load(img_path+'speed.png')  #미사일 이미지 설정
+    bQuantityItem = pygame.image.load(img_path+'quantity.png')  #미사일 이미지 설정
 
     boss = pygame.image.load(img_path+'boss.png') #보스 이미지 설정 (추가 해야됨)
-    pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 
-    laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 
-    boss_bullet = pygame.image.load(img_path+'boss_bullet.png') #보스 탄막 이미지
+    pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 (추가 해야됨)
+    laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 (추가 해야됨)
     curtain = pygame.image.load(img_path+'curtain.png') #장막 이미지
 
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
