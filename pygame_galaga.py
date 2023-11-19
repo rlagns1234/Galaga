@@ -43,6 +43,7 @@ boss_height = 45  #보스 높이
 curtain_height = 200 #장막 높이
 elimit = False
 startTime = 0
+count = 0
 
 # 스코어 화면에 띄우기(제거 예정)
 def drawScore(count):
@@ -124,7 +125,22 @@ def start():
                 return True
     else:
         return False
-
+    
+def clear(count):
+    sleep(1)
+    gamepad.fill(BLACK) #배경 검은색으로 채우기
+    startMessage("CLEAR!", -150, 80, WHITE)
+    startMessage('Score: ' + str(count), 0, 45, WHITE)
+    startMessage("press enter to restart", 100, 45, WHITE)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:   #화면 종료시
+                pygame.quit()   #게임 종료
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN: #재시작
+                    runGame()
+                elif event.key == pygame.K_ESCAPE: #종료
+                    pygame.quit()
 
 # 게임에 등장하는 객체를 그려줌
 def drawObject(obj, x, y):
@@ -707,7 +723,7 @@ def createbarrage():   #탄막 생성 함수
         #barrage_y += 30
 
 def bosspattern3():    # 탄막 구동 함수
-    global enemy_xy, barrage_radius, bp3
+    global enemy_xy, barrage_radius, bp3, boss_bullet
     barrage_speed = 5        #탄막 속도
     barrage_radius = 10      #탄막 넓이(원의 넓이)
 
@@ -727,7 +743,7 @@ def bosspattern3():    # 탄막 구동 함수
             except:
                 pass
         if len(enemy_xy[9]) != 0:
-            pygame.draw.circle(gamepad, RED, (bxy[0], bxy[1]), barrage_radius)  #인덱스 2: 탄막 위치 , 인덱스 3: 탄막 크기(원의 반지름)
+            drawObject(boss_bullet, bxy[0], bxy[1])
 
 # 보스 패턴 4 (화면 가리는 장막 설치) 
 def bosspattern4():
@@ -754,7 +770,7 @@ def runGame():
     global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, iPersentage
     global boss, boss_play, boss_hp, boss_time
     global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play, elimit
-    count = 0   #격추한 수
+    global count #격추한 수
 
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
@@ -787,7 +803,7 @@ def runGame():
     nextLevel = [10, 10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 관련 변수
-    boss_hp = 0
+    boss_hp = 200
     boss_play = False
     elimit = False
     time_stamp = 0
@@ -798,7 +814,7 @@ def runGame():
     pat3 = False
     pat4 = False
     laser_play = False
-    boss_time = 10
+    boss_time = 1
 
     Stop = False    
     ongame = False
@@ -1040,6 +1056,8 @@ def runGame():
                             try:
                                 boss_hp -= 1
                                 bullet_xy.remove(bxy)
+                                if boss_hp <= 0:
+                                    ongame = True
                             except:
                                 pass
                     else:
@@ -1053,8 +1071,10 @@ def runGame():
         if(ongame):
             break
         clock.tick(60)  #프레임 초당 60fps 설정
-    
-    crash(count)
+    if boss_hp <= 0:
+        clear(count)
+    else:
+        crash(count)
 
 #초기 설정
 def initGame():
@@ -1062,7 +1082,7 @@ def initGame():
     global bullet, fighter, life, lifeItem, bSpeedItem, bQuantityItem
     global enemy0, enemy1,enemy2,enemy3,enemy4, enemybullet, enemy5
     global crash_sound, game_over, shot, heart_up, quantity_up, speed_up
-    global boss, laser, pre_laser, curtain
+    global boss, laser, pre_laser, curtain, boss_bullet
     
     pygame.init()   #파이게임 라이브러리 초기화
     gamepad = pygame.display.set_mode((pad_width, pad_height))  #화면 크기 설정 및 생성
@@ -1089,8 +1109,9 @@ def initGame():
     bQuantityItem = pygame.image.load(img_path+'quantity.png')  #미사일 이미지 설정
 
     boss = pygame.image.load(img_path+'boss.png') #보스 이미지 설정 (추가 해야됨)
-    pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 (추가 해야됨)
-    laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 (추가 해야됨)
+    pre_laser = pygame.image.load(img_path+'pre_laser.png') #사전 레이저 이미지 설정 
+    laser = pygame.image.load(img_path+'laser.png') #레이저 이미지 설정 
+    boss_bullet = pygame.image.load(img_path+'boss_bullet.png') #보스 탄막 이미지
     curtain = pygame.image.load(img_path+'curtain.png') #장막 이미지
 
     clock = pygame.time.Clock()   #파이게임 시계 가져오기
