@@ -26,7 +26,7 @@ enemy_width = 26    #적 넓이
 enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
-scoreList = [100, 120, 120, 300, 150, 500, 5000]  #적, 보스 스코어
+scoreList = [10, 12, 12, 30, 15, 50, 10000]  #적, 보스 스코어
 start_life = 3  #시작 생명
 start_bQuantity = 1  #시작 미사일 수량
 start_bSpeed = 10    #시작 미사일 속도
@@ -570,7 +570,7 @@ def playEnemy4(enemy4_speed, time_now):
         if len(enemy_xy[4]) != 0:
             drawObject(enemy4, exy[0], exy[1])
         elif time_now >= boss_time:
-           enemy4_count_0 = True
+            enemy4_count_0 = True
 
 #적5 생성 함수
 def createEnemy5():
@@ -754,8 +754,9 @@ def runGame():
     global bullet_speed, bullet_quantity, bSpeed_xy, bQuantity_xy, bSpeed_play, bQuantity_play, iPersentage
     global boss, boss_play, boss_hp, boss_time
     global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play, elimit
-    count = 0   #격추한 수
+    global count #격추한 수
 
+    count = 0   #격추한 수
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
     x_change = 0    #갤러리안의 x좌표 변화량
@@ -787,7 +788,7 @@ def runGame():
     nextLevel = [10, 10, 10, 10, 10, 10]    #적 생성 확률이 올라가는 다음번 시간 ex) 적n의 값이 60이라면 게임 시작 후 60초 후 적n 등장확률 올림
 
     #보스 관련 변수
-    boss_hp = 0
+    boss_hp = 300
     boss_play = False
     elimit = False
     time_stamp = 0
@@ -1044,7 +1045,6 @@ def runGame():
                                 pass
                     else:
                         pass
-                      
         drawLife(life_count)
         drawScore(count)
         if time.time() - ebCrash > 3:
@@ -1053,8 +1053,11 @@ def runGame():
         if(ongame):
             break
         clock.tick(60)  #프레임 초당 60fps 설정
-    
-    crash(count)
+    if boss_hp <= 0:
+        count += scoreList[6]
+        clear(count, time.time()-startTime)
+    else:
+        crash(count)
 
 #초기 설정
 def initGame():
