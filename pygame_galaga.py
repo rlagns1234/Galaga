@@ -28,6 +28,7 @@ enemy_height = 20   #적 높이
 bullet_width = 4    #미사일 넓이
 bullet_height = 20  #미사일 높이
 scoreList = [10, 12, 12, 30, 15, 50, 10000]  #적, 보스 스코어
+
 start_life = 3  #시작 생명
 start_bQuantity = 1  #시작 미사일 수량
 start_bSpeed = 10    #시작 미사일 속도
@@ -615,7 +616,7 @@ def playEnemy4(enemy4_speed, time_now):
         if len(enemy_xy[4]) != 0:
             drawObject(enemy4, exy[0], exy[1])
         elif time_now >= boss_time:
-            enemy4_count_0 = True
+           enemy4_count_0 = True
 
 #적5 생성 함수
 def createEnemy5():
@@ -800,6 +801,7 @@ def runGame():
     global boss, boss_play, boss_hp, boss_time
     global time_stamp, time_stamp1, time_stamp2, pat1, pat2, pat3, pat4, laser_play, elimit
     global count #격추한 수
+    count = 0   #격추한 수
 
     x = pad_width*0.45  #갤러리안의 X좌표(좌측)
     y = pad_height*0.9  #갤러리안의 Y좌표(상단)
@@ -853,7 +855,6 @@ def runGame():
 
     ongame = start()# 시작화면 실행
     Restart = Restart + 1
-    count = 0
 
     while not ongame:
         for event in pygame.event.get():    #키 이벤트 처리  
@@ -928,7 +929,6 @@ def runGame():
         #적 및 보스 구동 (현재 시각 - 시작시각이 보스 등장 시간보다 작을 때 적 소환, 클 때 보스 소환)
         if time.time()-startTime >= boss_time:
             elimit = True
-            print(not enemy_xy[0], not enemy_xy[1], not enemy_xy[2], not enemy_xy[3], not enemy_xy[4], not enemy_xy[5], not enemy_xy[6])
             if(not enemy_xy[0] and not enemy_xy[1] and not enemy_xy[2] and not enemy_xy[3] and not enemy_xy[4] and not enemy_xy[5] and not enemy_xy[6]):
                 boss_play = True
             
@@ -1089,7 +1089,6 @@ def runGame():
                                 pass
                     else:
                         pass
-
         drawLife(life_count)
         drawScore(count)
         drawTime(time.time()-startTime)
