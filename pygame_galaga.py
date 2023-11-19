@@ -125,7 +125,8 @@ def start():
                 return True
     else:
         return False
-    
+
+#클리어 화면 함수    
 def clear(count):
     sleep(1)
     gamepad.fill(BLACK) #배경 검은색으로 채우기
