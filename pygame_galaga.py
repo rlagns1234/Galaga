@@ -814,7 +814,7 @@ def runGame():
     pat3 = False
     pat4 = False
     laser_play = False
-    boss_time = 1
+    boss_time = 120
 
     Stop = False    
     ongame = False
